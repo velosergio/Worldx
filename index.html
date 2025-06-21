@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worldx - Juego de Gran Estrategia 4X</title>
+    <link rel="stylesheet" href="styles/main.css">
+    
+    <!-- Dependencias externas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Menú principal -->
+    <div id="menu-container" class="menu-container">
+        <div class="menu-content">
+            <h1 class="game-title">Worldx</h1>
+            <p class="game-subtitle">Juego de Gran Estrategia 4X</p>
+            
+            <div class="menu-buttons">
+                <button id="new-game-btn" class="menu-btn primary">Nueva Partida</button>
+                <button id="load-game-btn" class="menu-btn secondary">Cargar Partida</button>
+                <button id="instructions-btn" class="menu-btn secondary">Instrucciones</button>
+            </div>
+            
+            <div class="game-info">
+                <p>Desarrolla tu nación a través de los siglos</p>
+                <p>Gestiona recursos, toma decisiones estratégicas y compite con otras civilizaciones</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden">
+        <!-- Header del juego -->
+        <header class="game-header">
+            <div class="year-display">
+                <span class="year-label">Semana</span>
+                <span id="current-year" class="year-number">0</span>
+                <span class="year-max">/ 100</span>
+            </div>
+            <div class="time-controls">
+                <div class="day-spinner">
+                    <div class="day" data-day="1">L</div>
+                    <div class="day" data-day="2">M</div>
+                    <div class="day" data-day="3">X</div>
+                    <div class="day" data-day="4">J</div>
+                    <div class="day" data-day="5">V</div>
+                    <div class="day" data-day="6">S</div>
+                    <div class="day" data-day="7">D</div>
+                </div>
+                <div class="speed-controls">
+                    <button id="pause-btn" class="speed-btn active" data-speed="0">⏸️</button>
+                    <button id="play-btn-x1" class="speed-btn" data-speed="1">x1</button>
+                    <button id="play-btn-x2" class="speed-btn" data-speed="2">x2</button>
+                    <button id="play-btn-x4" class="speed-btn" data-speed="4">x4</button>
+                </div>
+            </div>
+            <div class="game-actions">
+                <button id="save-btn" class="control-btn">💾 Guardar</button>
+                <button id="load-btn" class="control-btn">📂 Cargar</button>
+            </div>
+        </header>
+
+        <!-- Panel principal del país del jugador -->
+        <div class="main-panel">
+            <div class="player-country-panel">
+                <h2 id="player-country-name">Mi País</h2>
+                <div class="stats-container">
+                    <div class="stat-item" data-stat="military">
+                        <div class="stat-label">⚔️ Militar</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="military-fill"></div>
+                        </div>
+                        <div class="stat-value" id="military-value">0</div>
+                        <div class="stat-dev-control">
+                            <button class="dev-btn" data-action="add" data-stat="military">+</button>
+                            <span class="dev-value" data-stat-pending="military">+0</span>
+                        </div>
+                    </div>
+                    <div class="stat-item" data-stat="social">
+                        <div class="stat-label">🏛️ Social</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="social-fill"></div>
+                        </div>
+                        <div class="stat-value" id="social-value">0</div>
+                        <div class="stat-dev-control">
+                            <button class="dev-btn" data-action="add" data-stat="social">+</button>
+                            <span class="dev-value" data-stat-pending="social">+0</span>
+                        </div>
+                    </div>
+                    <div class="stat-item" data-stat="culture">
+                        <div class="stat-label">🎭 Cultura</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="culture-fill"></div>
+                        </div>
+                        <div class="stat-value" id="culture-value">0</div>
+                        <div class="stat-dev-control">
+                            <button class="dev-btn" data-action="add" data-stat="culture">+</button>
+                            <span class="dev-value" data-stat-pending="culture">+0</span>
+                        </div>
+                    </div>
+                    <div class="stat-item" data-stat="science">
+                        <div class="stat-label">🔬 Ciencia</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="science-fill"></div>
+                        </div>
+                        <div class="stat-value" id="science-value">0</div>
+                        <div class="stat-dev-control">
+                            <button class="dev-btn" data-action="add" data-stat="science">+</button>
+                            <span class="dev-value" data-stat-pending="science">+0</span>
+                        </div>
+                    </div>
+                    <div class="stat-item" data-stat="economy">
+                        <div class="stat-label">💰 Economía</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" id="economy-fill"></div>
+                        </div>
+                        <div class="stat-value" id="economy-value">0</div>
+                        <div class="stat-dev-control">
+                            <button class="dev-btn" data-action="add" data-stat="economy">+</button>
+                            <span class="dev-value" data-stat-pending="economy">+0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="global-development-panel">
+                    <h3>Puntos de Desarrollo: <span id="available-points">10</span></h3>
+                    <div class="global-dev-buttons">
+                        <button id="apply-development" class="apply-btn">Aplicar Desarrollo</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de otros países -->
+            <div class="other-countries-panel">
+                <h3>Intel de Otros Países</h3>
+                <div id="other-countries-list">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de eventos -->
+        <div id="events-panel" class="events-panel hidden">
+            <h3>Eventos Recientes</h3>
+            <div id="events-list">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Canvas para gráficos -->
+        <div class="canvas-container">
+            <canvas id="game-canvas"></canvas>
+        </div>
+
+        <!-- Modal de eventos -->
+        <div id="event-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="event-title">Evento</h2>
+                    <button class="close-btn" id="close-event-modal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div id="event-description"></div>
+                    <div id="event-effects"></div>
+                </div>
+                <button id="continue-btn" class="continue-btn">Continuar</button>
+            </div>
+        </div>
+
+        <!-- Modal de victoria -->
+        <div id="victory-modal" class="modal hidden">
+            <div class="modal-content victory-content">
+                <div class="modal-header">
+                    <h2>¡Victoria!</h2>
+                </div>
+                <div class="modal-body">
+                    <div id="victory-message"></div>
+                    <div id="final-stats"></div>
+                </div>
+                <button id="new-game-btn" class="new-game-btn">Nueva Partida</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de configuración de nueva partida -->
+    <div id="new-game-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Elige tu Destino</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="country-name-input">Nombre de tu Nación:</label>
+                    <div class="input-group">
+                        <input type="text" id="country-name-input" placeholder="Imperio del Sol...">
+                        <button id="random-name-btn" title="Generar nombre aleatorio">🎲</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="start-game-btn" class="continue-btn">Comenzar Aventura</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts del juego -->
+    <!-- Lógica central -->
+    <script src="js/utils/MathUtils.js"></script>
+    <script src="js/utils/RandomUtils.js"></script>
+
+    <script src="js/data/PersonageGenerator.js"></script>
+    <script src="js/data/EventData.js"></script>
+    <script src="js/data/CountryGenerator.js"></script>
+
+    <!-- Componentes de la interfaz de usuario -->
+    <script src="js/ui/StatsDisplay.js"></script>
+    <script src="js/ui/EventModal.js"></script>
+    <script src="js/ui/UIManager.js"></script>
+
+    <!-- Módulos principales del juego -->
+    <script src="js/core/CountryManager.js"></script>
+    <script src="js/core/EventSystem.js"></script>
+    <script src="js/core/AIController.js"></script>
+    <script src="js/core/GameLoop.js"></script>
+
+    <!-- Archivo principal del juego -->
+    <script src="js/main.js"></script>
+</body>
+</html> 
