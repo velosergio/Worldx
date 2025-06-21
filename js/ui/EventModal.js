@@ -61,16 +61,21 @@ class EventModal {
 
         if (!modal || !title || !description || !effects || !countryName) return;
 
-        // Configurar contenido
-        title.textContent = event.title;
+        // Configurar contenido con icono y color
+        const eventIcon = this.getEventIcon(event.type);
+        const eventColor = this.getEventColor(event.type);
+        
+        title.innerHTML = `${eventIcon} ${event.title}`;
+        title.style.color = eventColor;
+        
         description.textContent = event.description;
         countryName.textContent = country.name;
 
-        // Mostrar efectos
+        // Mostrar efectos con mejor formato
         this.showEffects(effects, event);
 
         // Configurar estilo según tipo de evento
-        this.setEventStyle(modal, event.type);
+        this.setEventStyle(modal, event);
 
         // Mostrar modal con animación
         modal.classList.remove('hidden');
@@ -123,13 +128,15 @@ class EventModal {
     }
 
     /**
-     * Muestra los efectos del evento
+     * Muestra los efectos del evento con mejor formato
+     * @param {HTMLElement} container - Contenedor para los efectos
+     * @param {Object} event - Evento
      */
     showEffects(container, event) {
         container.innerHTML = '';
 
         if (!event.effects || Object.keys(event.effects).length === 0) {
-            container.innerHTML = '<p>Este evento no tiene efectos directos.</p>';
+            container.innerHTML = '<p class="no-effects">Este evento no tiene efectos directos.</p>';
             return;
         }
 
@@ -153,30 +160,93 @@ class EventModal {
         });
 
         container.appendChild(effectsList);
+
+        // Añadir información adicional si existe
+        if (event.duration && event.duration > 0) {
+            const durationInfo = document.createElement('div');
+            durationInfo.className = 'duration-info';
+            durationInfo.innerHTML = `<span class="duration-icon">⏱️</span> Duración: ${event.duration} semanas`;
+            container.appendChild(durationInfo);
+        }
+
+        if (event.rarity) {
+            const rarityInfo = document.createElement('div');
+            rarityInfo.className = 'rarity-info';
+            const rarityNames = {
+                'common': 'Común',
+                'uncommon': 'Poco común',
+                'rare': 'Raro',
+                'epic': 'Épico',
+                'legendary': 'Legendario'
+            };
+            rarityInfo.innerHTML = `<span class="rarity-icon">⭐</span> Rareza: ${rarityNames[event.rarity] || event.rarity}`;
+            container.appendChild(rarityInfo);
+        }
     }
 
     /**
      * Configura el estilo del modal según el tipo de evento
+     * @param {HTMLElement} modal - Elemento del modal
+     * @param {Object} event - Evento
      */
-    setEventStyle(modal, eventType) {
+    setEventStyle(modal, event) {
         // Remover estilos anteriores
-        modal.classList.remove('event-personage', 'event-crisis', 'event-inspiration', 'event-development');
+        modal.classList.remove('event-personage', 'event-crisis', 'event-inspiration', 
+                              'event-milestone', 'event-discovery', 'event-cultural', 
+                              'event-technological', 'event-development');
 
         // Añadir estilo según tipo
-        switch (eventType) {
-            case 'personage':
-                modal.classList.add('event-personage');
-                break;
-            case 'crisis':
-                modal.classList.add('event-crisis');
-                break;
-            case 'inspiration':
-                modal.classList.add('event-inspiration');
-                break;
-            case 'development':
-                modal.classList.add('event-development');
-                break;
+        const eventType = event.type;
+        if (eventType) {
+            modal.classList.add(`event-${eventType}`);
         }
+
+        // Aplicar color de borde según tipo
+        const eventColor = this.getEventColor(eventType);
+        modal.style.borderColor = eventColor;
+        
+        // Aplicar sombra con el color del evento
+        modal.style.boxShadow = `0 0 20px ${eventColor}40`;
+    }
+
+    /**
+     * Obtiene el icono asociado a un tipo de evento
+     * @param {string} eventType - Tipo de evento
+     * @returns {string} Emoji del icono
+     */
+    getEventIcon(eventType) {
+        const icons = {
+            'personage': '👤',
+            'crisis': '⚠️',
+            'inspiration': '💡',
+            'milestone': '🏆',
+            'discovery': '🔍',
+            'cultural': '🎭',
+            'technological': '⚙️',
+            'development': '📈'
+        };
+        
+        return icons[eventType] || '📋';
+    }
+
+    /**
+     * Obtiene el color asociado a un tipo de evento
+     * @param {string} eventType - Tipo de evento
+     * @returns {string} Color en formato CSS
+     */
+    getEventColor(eventType) {
+        const colors = {
+            'personage': '#ffd700', // Dorado
+            'crisis': '#ff4444', // Rojo
+            'inspiration': '#44ff44', // Verde
+            'milestone': '#4444ff', // Azul
+            'discovery': '#ff44ff', // Magenta
+            'cultural': '#ff8844', // Naranja
+            'technological': '#44ffff', // Cian
+            'development': '#888888' // Gris
+        };
+        
+        return colors[eventType] || '#ffffff';
     }
 
     /**
@@ -199,55 +269,34 @@ class EventModal {
      * Muestra un evento especial (edad dorada, victoria, etc.)
      */
     showSpecialEvent(type, data, pauseGame = false) {
-        const modal = document.getElementById('event-modal');
-        const title = document.getElementById('event-title');
-        const description = document.getElementById('event-description');
-        const effects = document.getElementById('event-effects');
+        const victoryModal = document.getElementById('victory-modal');
+        if (!victoryModal) return;
 
-        if (!modal || !title || !description || !effects) return;
+        const titleElement = victoryModal.querySelector('h2');
+        const messageElement = document.getElementById('victory-message');
+        const statsElement = document.getElementById('final-stats');
 
-        // Configurar contenido según el tipo
+        if (!titleElement || !messageElement || !statsElement) return;
+
+        // Limpiar contenido anterior
+        messageElement.innerHTML = '';
+        statsElement.innerHTML = '';
+
         switch (type) {
-            case 'golden-age':
-                title.textContent = '🌟 ¡Edad Dorada!';
-                description.textContent = `${data.country.name} ha entrado en una edad dorada de desarrollo ${this.getStatDisplayName(data.triggerStat)}.`;
-                this.showGoldenAgeEffects(effects);
-                break;
             case 'victory':
-                title.textContent = '🏆 ¡Victoria!';
-                description.textContent = `${data.winner.name} ha alcanzado la supremacía ${this.getStatDisplayName(data.winningStat)} y ha ganado el juego.`;
-                this.showVictoryEffects(effects, data);
+                titleElement.textContent = '¡Victoria!';
+                this.showVictoryEffects(statsElement, data);
                 break;
             case 'game-over':
-                title.textContent = '⏰ Fin del Juego';
-                description.textContent = 'El tiempo ha terminado. Aquí están las estadísticas finales:';
-                this.showGameOverEffects(effects, data);
+                titleElement.textContent = 'Fin del Juego';
+                this.showGameOverEffects(statsElement, data);
                 break;
+            default:
+                return;
         }
 
-        // Configurar estilo especial
-        modal.classList.remove('event-personage', 'event-crisis', 'event-inspiration', 'event-development');
-        modal.classList.add(`event-${type.replace('-', '-')}`);
-
-        // Mostrar modal
-        modal.classList.remove('hidden');
-        modal.classList.add('show');
-
-        // Animación de entrada
-        gsap.fromTo(modal, 
-            { 
-                scale: 0.8, 
-                opacity: 0,
-                y: -50
-            },
-            { 
-                scale: 1, 
-                opacity: 1,
-                y: 0,
-                duration: 0.3,
-                ease: "back.out(1.7)"
-            }
-        );
+        // Mostrar modal de victoria
+        victoryModal.classList.remove('hidden');
     }
 
     /**
@@ -274,18 +323,22 @@ class EventModal {
      * Muestra efectos de victoria
      */
     showVictoryEffects(container, data) {
+        if (!container || !data) return;
+        
+        const winner = data.winner;
+        const totalScore = Object.values(winner.stats).reduce((sum, stat) => sum + stat, 0);
+        
+        const messageElement = document.getElementById('victory-message');
+        if (messageElement) {
+            messageElement.innerHTML = `
+                <p>${winner.name} ha alcanzado la supremacía ${this.getStatDisplayName(data.winningStat)} y ha ganado el juego.</p>
+            `;
+        }
+
         container.innerHTML = `
-            <ul class="effects-list">
-                <li class="effect-item">
-                    <span class="effect-icon">🏆</span>
-                    <span class="effect-stat">${data.winner.name}</span>
-                    <span class="effect-value positive">Victoria</span>
-                </li>
-                <li class="effect-item">
-                    <span class="effect-icon">📊</span>
-                    <span class="effect-stat">Puntuación Total</span>
-                    <span class="effect-value positive">${Object.values(data.winner.stats).reduce((sum, stat) => sum + stat, 0)}</span>
-                </li>
+            <ul>
+                <li>🏆 <strong>${winner.name}</strong>: ¡Victoria por ${this.getStatDisplayName(data.winningStat)}!</li>
+                <li>📊 <strong>Puntuación Total</strong>: ${MathUtils.format(totalScore)}</li>
             </ul>
         `;
     }
@@ -294,20 +347,19 @@ class EventModal {
      * Muestra efectos de fin de juego
      */
     showGameOverEffects(container, data) {
-        let html = '<ul class="effects-list">';
-        
-        data.countries.forEach(country => {
-            const total = Object.values(country.stats).reduce((sum, stat) => sum + stat, 0);
-            html += `
-                <li class="effect-item">
-                    <span class="effect-icon">🏛️</span>
-                    <span class="effect-stat">${country.name}</span>
-                    <span class="effect-value neutral">${total} puntos</span>
-                </li>
-            `;
+        if (!container || !data) return;
+
+        const sortedCountries = [...data.countries].sort((a, b) => {
+            const scoreA = Object.values(a.stats).reduce((sum, stat) => sum + stat, 0);
+            const scoreB = Object.values(b.stats).reduce((sum, stat) => sum + stat, 0);
+            return scoreB - scoreA;
         });
-        
-        html += '</ul>';
-        container.innerHTML = html;
+
+        const list = sortedCountries.map(country => {
+            const score = Object.values(country.stats).reduce((sum, stat) => sum + stat, 0);
+            return `<li><strong>${country.name}</strong>: ${MathUtils.format(score)} puntos</li>`;
+        }).join('');
+
+        container.innerHTML = `<ul>${list}</ul>`;
     }
 } 

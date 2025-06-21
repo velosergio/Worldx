@@ -179,7 +179,7 @@
                     <div id="victory-message"></div>
                     <div id="final-stats"></div>
                 </div>
-                <button id="new-game-btn" class="new-game-btn">Nueva Partida</button>
+                <button id="main-menu-btn" class="new-game-btn">Menú Principal</button>
             </div>
         </div>
     </div>
@@ -209,6 +209,15 @@
     <!-- Lógica central -->
     <script src="js/utils/MathUtils.js"></script>
     <script src="js/utils/RandomUtils.js"></script>
+
+    <!-- Sistema de eventos modular -->
+    <script src="js/data/events/EventTypes.js"></script>
+    <script src="js/data/events/PersonageEvents.js"></script>
+    <script src="js/data/events/CrisisEvents.js"></script>
+    <script src="js/data/events/InspirationEvents.js"></script>
+    <script src="js/data/events/SpecialEvents.js"></script>
+    <script src="js/data/events/DevelopmentEvents.js"></script>
+    <script src="js/data/events/EventManager.js"></script>
 
     <script src="js/data/PersonageGenerator.js"></script>
     <script src="js/data/EventData.js"></script>

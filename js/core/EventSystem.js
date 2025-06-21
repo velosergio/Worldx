@@ -49,7 +49,7 @@ class EventSystem {
         
         countries.forEach(country => {
             const event = this.generateRandomEvent(country, year);
-            if (event && this.eventData.shouldTriggerEvent(event, country)) {
+            if (event && this.eventData.shouldTriggerEvent(event, country, year)) {
                 this.applyEvent(event, country);
                 events.push({ event, country });
             }

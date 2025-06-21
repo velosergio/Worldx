@@ -160,4 +160,20 @@ class MathUtils {
                 return t;
         }
     }
+
+    /**
+     * Formatea un número para visualización
+     * - Si es un entero, lo devuelve como tal
+     * - Si es decimal, lo redondea a 2 decimales
+     * @param {number} value - Valor a formatear
+     * @returns {number} Valor formateado
+     */
+    static format(value) {
+        if (typeof value !== 'number') return value;
+        // Redondear a 2 decimales solo si es necesario
+        if (value % 1 !== 0) {
+            return parseFloat(value.toFixed(2));
+        }
+        return value;
+    }
 } 

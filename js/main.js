@@ -133,10 +133,16 @@ class WorldxGame {
         // Añadir puntos de desarrollo semanales
         this.countryManager.addAnnualDevelopmentPoints(1);
         
-        // Generar eventos cada 4 semanas
+        // Generar eventos más frecuentemente
+        this.generateWeeklyEvents();
+        
+        // Generar eventos especiales cada 4 semanas
         if (this.currentYear % 4 === 0) {
             this.generateYearlyEvents();
         }
+        
+        // Actualizar eventos activos (para efectos temporales)
+        this.eventSystem.updateEvents();
         
         // Tomar decisiones de IA
         this.aiController.makeDecisions(this.countryManager.getAICountries());
@@ -155,7 +161,52 @@ class WorldxGame {
     }
 
     /**
-     * Genera eventos anuales
+     * Genera eventos semanales (más frecuentes)
+     */
+    generateWeeklyEvents() {
+        const countries = this.countryManager.getAllCountries();
+        const events = [];
+        
+        // Cada país tiene una probabilidad de tener un evento semanal
+        countries.forEach(country => {
+            // Probabilidad base de 30% por semana
+            let eventChance = 0.3;
+            
+            // Aumentar probabilidad si el país tiene estadísticas altas
+            const totalStats = Object.values(country.stats).reduce((sum, stat) => sum + stat, 0);
+            if (totalStats > 20) eventChance += 0.1;
+            if (totalStats > 30) eventChance += 0.1;
+            
+            // Disminuir probabilidad si ya tiene muchos eventos activos
+            const activeEvents = country.events ? country.events.filter(e => e.isActive).length : 0;
+            if (activeEvents > 2) eventChance *= 0.5;
+            
+            if (Math.random() < eventChance) {
+                const event = this.eventSystem.generateRandomEvent(country, this.currentYear);
+                if (event && this.eventSystem.eventData.shouldTriggerEvent(event, country)) {
+                    this.eventSystem.applyEvent(event, country);
+                    events.push({ event, country });
+                }
+            }
+        });
+        
+        // Mostrar eventos al jugador
+        events.forEach(({ event, country }) => {
+            if (country.id === this.countryManager.getPlayerCountry().id) {
+                this.uiManager.addPendingEvent(event, country);
+            }
+        });
+        
+        // Mostrar primer evento si hay
+        if (this.uiManager.pendingEvents.length > 0) {
+            setTimeout(() => {
+                this.uiManager.showNextEvent();
+            }, 300);
+        }
+    }
+
+    /**
+     * Genera eventos anuales (especiales)
      */
     generateYearlyEvents() {
         const countries = this.countryManager.getAllCountries();

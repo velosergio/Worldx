@@ -137,6 +137,14 @@ class UIManager {
                 this.game.startGame(countryName);
             });
         }
+
+        // Botón de menú principal en modal de victoria
+        const mainMenuBtn = document.getElementById('main-menu-btn');
+        if (mainMenuBtn) {
+            mainMenuBtn.addEventListener('click', () => {
+                window.location.reload();
+            });
+        }
     }
 
     /**
@@ -205,17 +213,14 @@ class UIManager {
         // Actualizar estadísticas
         Object.keys(playerCountry.stats).forEach(stat => {
             const valueElement = document.getElementById(`${stat}-value`);
-            const fillElement = document.getElementById(`${stat}-fill`);
-            
             if (valueElement) {
-                valueElement.textContent = playerCountry.stats[stat];
+                valueElement.textContent = MathUtils.format(playerCountry.stats[stat]);
             }
-            
+
+            const fillElement = document.getElementById(`${stat}-fill`);
             if (fillElement) {
                 const percentage = (playerCountry.stats[stat] / 100) * 100;
                 fillElement.style.width = `${percentage}%`;
-                
-                // Cambiar color según el valor
                 this.updateStatColor(fillElement, playerCountry.stats[stat]);
             }
         });
@@ -226,9 +231,11 @@ class UIManager {
             pointsElement.textContent = playerCountry.developmentPoints;
         }
 
-        // Verificar edad dorada
+        // Efecto de edad dorada
         if (playerCountry.goldenAgeTriggered) {
             this.showGoldenAgeEffect();
+            // Resetear para que no se muestre en cada actualización
+            playerCountry.goldenAgeTriggered = false; 
         }
     }
 
@@ -236,15 +243,23 @@ class UIManager {
      * Actualiza el color de una estadística
      */
     updateStatColor(element, value) {
-        if (value >= 80) {
-            element.style.background = 'linear-gradient(90deg, #ffd700, #ffed4e)';
-        } else if (value >= 50) {
-            element.style.background = 'linear-gradient(90deg, #4CAF50, #8BC34A)';
-        } else if (value >= 30) {
-            element.style.background = 'linear-gradient(90deg, #FF9800, #FFC107)';
-        } else {
-            element.style.background = 'linear-gradient(90deg, #f44336, #e91e63)';
+        if (!element) return;
+
+        let color = '#4a90e2'; // Azul por defecto
+
+        if (value >= 80) { // Glorioso
+            color = 'linear-gradient(90deg, #ffd700, #ffec8b)';
+        } else if (value >= 60) { // Fuerte
+            color = 'linear-gradient(90deg, #4caf50, #81c784)';
+        } else if (value >= 40) { // Estable
+            color = 'linear-gradient(90deg, #8bc34a, #c5e1a5)';
+        } else if (value >= 20) { // En desarrollo
+            color = 'linear-gradient(90deg, #ffc107, #ffd54f)';
+        } else { // Débil
+            color = 'linear-gradient(90deg, #f44336, #e57373)';
         }
+
+        element.style.background = color;
     }
 
     /**
@@ -264,24 +279,25 @@ class UIManager {
      * Actualiza información de otros países
      */
     updateOtherCountries() {
-        if (!this.game) return;
+        const intelList = document.getElementById('other-countries-list');
+        const otherCountries = this.game?.getOtherCountriesIntel();
 
-        const otherCountries = this.game.getOtherCountriesIntel();
-        const container = document.getElementById('other-countries-list');
-        
-        if (!container) return;
+        if (!intelList || !otherCountries) return;
 
-        container.innerHTML = '';
-        
+        intelList.innerHTML = '';
+
         otherCountries.forEach(country => {
-            const countryElement = document.createElement('div');
-            countryElement.className = 'country-item';
-            countryElement.innerHTML = `
+            const item = document.createElement('div');
+            item.className = 'country-item';
+            
+            const strengthFormatted = MathUtils.format(country.strength);
+
+            item.innerHTML = `
                 <div class="country-name">${country.name}</div>
                 <div class="country-rumor">${country.rumor}</div>
-                <div class="country-strength">Fuerza: ${country.strength}</div>
+                <div class="country-strength">Fuerza: ${strengthFormatted}</div>
             `;
-            container.appendChild(countryElement);
+            intelList.appendChild(item);
         });
     }
 

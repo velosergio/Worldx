@@ -86,6 +86,10 @@ class CountryManager {
     checkGoldenAge(country, development) {
         if (country.goldenAgeActivated) return;
 
+        // Verificar tiempo mínimo de juego (30 semanas)
+        const currentYear = window.worldxGame ? window.worldxGame.currentYear : 0;
+        if (currentYear < 30) return;
+
         const maxPoints = Math.max(...Object.values(development));
         if (maxPoints >= 3) {
             country.goldenAgeActivated = true;
