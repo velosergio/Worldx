@@ -14,6 +14,7 @@ class EventTypes {
     static ECONOMIC = 'economic';
     static SOCIAL = 'social';
     static NATURAL = 'natural';
+    static POPULATION = 'population';
 
     /**
      * Obtiene todos los tipos de eventos
@@ -31,7 +32,8 @@ class EventTypes {
             TECHNOLOGICAL: this.TECHNOLOGICAL,
             ECONOMIC: this.ECONOMIC,
             SOCIAL: this.SOCIAL,
-            NATURAL: this.NATURAL
+            NATURAL: this.NATURAL,
+            POPULATION: this.POPULATION
         };
     }
 
@@ -49,7 +51,8 @@ class EventTypes {
             [this.DISCOVERY]: '#ff44ff', // Magenta
             [this.CULTURAL]: '#ff8844', // Naranja
             [this.TECHNOLOGICAL]: '#44ffff', // Cian
-            [this.DEVELOPMENT]: '#888888' // Gris
+            [this.DEVELOPMENT]: '#888888', // Gris
+            [this.POPULATION]: '#ff66cc' // Rosa
         };
         
         return colors[eventType] || '#ffffff';
@@ -69,7 +72,8 @@ class EventTypes {
             [this.DISCOVERY]: '🔍',
             [this.CULTURAL]: '🎭',
             [this.TECHNOLOGICAL]: '⚙️',
-            [this.DEVELOPMENT]: '📈'
+            [this.DEVELOPMENT]: '📈',
+            [this.POPULATION]: '👥'
         };
         
         return icons[eventType] || '📋';

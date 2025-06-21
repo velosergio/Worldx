@@ -35,6 +35,7 @@ class CrisisEvents {
                 title: 'Revolución Popular',
                 description: 'El pueblo se ha levantado contra el gobierno, causando inestabilidad política.',
                 effects: { social: -3, economy: -1 },
+                populationEffects: { population: -50, birthRate: 0.8 },
                 duration: 3,
                 type: 'social',
                 severity: 'high'
@@ -43,6 +44,7 @@ class CrisisEvents {
                 title: 'Plaga Mortal',
                 description: 'Una enfermedad mortal se ha extendido por el país, causando estragos en la población.',
                 effects: { social: -2, economy: -1 },
+                populationEffects: { population: -100, birthRate: 0.5 },
                 duration: 3,
                 type: 'social',
                 severity: 'high'
@@ -51,6 +53,7 @@ class CrisisEvents {
                 title: 'Epidemia',
                 description: 'Una epidemia se ha propagado rápidamente, afectando la salud pública.',
                 effects: { social: -2, economy: -1 },
+                populationEffects: { population: -30, birthRate: 0.7 },
                 duration: 3,
                 type: 'social',
                 severity: 'medium'
@@ -111,6 +114,7 @@ class CrisisEvents {
                 title: 'Terremoto Devastador',
                 description: 'Un terremoto ha devastado regiones enteras del país.',
                 effects: { economy: -2, social: -1, military: -1 },
+                populationEffects: { population: -80, birthRate: 0.6 },
                 duration: 2,
                 type: 'natural',
                 severity: 'high'
@@ -119,6 +123,7 @@ class CrisisEvents {
                 title: 'Sequía Prolongada',
                 description: 'Una sequía prolongada ha devastado las cosechas y causado escasez de alimentos.',
                 effects: { economy: -2, social: -1 },
+                populationEffects: { population: -40, birthRate: 0.8 },
                 duration: 2,
                 type: 'natural',
                 severity: 'medium'
@@ -127,6 +132,7 @@ class CrisisEvents {
                 title: 'Inundación Masiva',
                 description: 'Inundaciones han destruido infraestructura y cultivos.',
                 effects: { economy: -1, social: -1 },
+                populationEffects: { population: -25, birthRate: 0.9 },
                 duration: 2,
                 type: 'natural',
                 severity: 'medium'
@@ -135,8 +141,38 @@ class CrisisEvents {
                 title: 'Erupción Volcánica',
                 description: 'Una erupción volcánica ha cubierto regiones con ceniza y lava.',
                 effects: { economy: -2, social: -1 },
+                populationEffects: { population: -60, birthRate: 0.7 },
                 duration: 3,
                 type: 'natural',
+                severity: 'high'
+            },
+            
+            // Nuevos eventos de crisis que afectan específicamente la población
+            {
+                title: 'Hambruna Masiva',
+                description: 'La escasez de alimentos ha causado una hambruna que afecta a toda la población.',
+                effects: { social: -3, economy: -2 },
+                populationEffects: { population: -150, birthRate: 0.3 },
+                duration: 4,
+                type: 'social',
+                severity: 'high'
+            },
+            {
+                title: 'Guerra Civil',
+                description: 'Un conflicto interno ha dividido al país, causando devastación y pérdida de vidas.',
+                effects: { military: -2, social: -3, economy: -2 },
+                populationEffects: { population: -200, birthRate: 0.4 },
+                duration: 5,
+                type: 'military',
+                severity: 'high'
+            },
+            {
+                title: 'Invasión Bárbara',
+                description: 'Hordas bárbaras han invadido el país, saqueando y destruyendo todo a su paso.',
+                effects: { military: -3, economy: -2, social: -2 },
+                populationEffects: { population: -120, birthRate: 0.5 },
+                duration: 3,
+                type: 'military',
                 severity: 'high'
             }
         ];

@@ -130,6 +130,9 @@ class WorldxGame {
         // Avanzar semana
         this.currentYear++;
         
+        // Actualizar población de todos los países
+        this.updatePopulation();
+        
         // Añadir puntos de desarrollo semanales
         this.countryManager.addAnnualDevelopmentPoints(1);
         
@@ -158,6 +161,34 @@ class WorldxGame {
         this.uiManager.updateDisplay();
         
         console.log(`Semana ${this.currentYear} completada`);
+    }
+
+    /**
+     * Actualiza la población de todos los países
+     */
+    updatePopulation() {
+        const countries = this.countryManager.getAllCountries();
+        
+        countries.forEach(country => {
+            // Calcular crecimiento base (0.5% por semana)
+            const baseGrowth = 0.005;
+            
+            // Aplicar multiplicador de natalidad
+            const growthRate = baseGrowth * country.birthRate;
+            
+            // Calcular nuevo crecimiento
+            const populationGrowth = Math.floor(country.population * growthRate);
+            
+            // Aplicar crecimiento
+            country.population += populationGrowth;
+            
+            // Asegurar que la población no baje de 1
+            if (country.population < 1) {
+                country.population = 1;
+            }
+            
+            console.log(`${country.name}: Población ${country.population} (+${populationGrowth}, tasa: ${(growthRate * 100).toFixed(2)}%)`);
+        });
     }
 
     /**
@@ -326,21 +357,14 @@ class WorldxGame {
     endGame(winner = null) {
         this.gameState = 'gameOver';
         this.gameLoop.stop();
-        
+
         if (winner) {
-            // Mostrar modal de victoria
-            this.uiManager.eventModal.showSpecialEvent('victory', {
-                winner: winner,
-                winningStat: Object.keys(winner.stats).reduce((a, b) => winner.stats[a] > winner.stats[b] ? a : b)
-            });
+            this.uiManager.showVictoryModal(winner);
         } else {
-            // Mostrar estadísticas finales
-            this.uiManager.eventModal.showSpecialEvent('game-over', {
-                countries: this.countryManager.getAllCountries()
-            });
+            const allCountries = this.countryManager.getAllCountries();
+            const rankedCountries = allCountries.map(c => ({...c, totalScore: Object.values(c.stats).reduce((s, v) => s + v, 0)})).sort((a,b) => b.totalScore - a.totalScore);
+            this.uiManager.showVictoryModal(rankedCountries[0]);
         }
-        
-        console.log('Juego terminado');
     }
 
     /**
@@ -461,6 +485,10 @@ class WorldxGame {
         if (!playerCountry) return [];
         
         return this.countryManager.getOtherCountriesIntel(playerCountry.id);
+    }
+
+    startGameLoop() {
+        this.gameLoop.start();
     }
 }
 

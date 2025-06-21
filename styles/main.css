@@ -268,12 +268,53 @@ body {
 }
 
 .player-country-panel h2 {
-    text-align: center;
-    margin-bottom: 25px;
-    font-size: 28px;
-    font-weight: 300;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.country-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.country-header h2 {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.country-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
     color: rgba(255, 255, 255, 0.8);
-    letter-spacing: 2px;
+    font-size: 16px;
+}
+
+.population-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.population-info::before {
+    content: "👥";
+    font-size: 14px;
+}
+
+#player-population {
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
 }
 
 /* Contenedor de estadísticas */
@@ -551,13 +592,17 @@ body {
 }
 
 .modal-content {
-    background: linear-gradient(135deg, #2a5298, #1e3c72);
-    border-radius: 15px;
+    background: linear-gradient(135deg, #2a3a5b, #1e2a4a);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
     padding: 30px;
-    max-width: 500px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 700px;
     width: 90%;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    max-height: 90vh;
 }
 
 .modal-header {
@@ -595,7 +640,8 @@ body {
 }
 
 .modal-body {
-    margin-bottom: 20px;
+    margin: 20px 0;
+    overflow-y: auto; /* Permitir scroll si el contenido es muy largo */
 }
 
 .continue-btn, .new-game-btn {
@@ -627,6 +673,69 @@ body {
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
+#final-stats {
+    margin-top: 20px;
+}
+
+.ranking-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ranking-item {
+    display: grid;
+    grid-template-columns: 40px 1.5fr 1fr 1fr;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.ranking-item.winner .country-name {
+    color: #ffd700;
+}
+
+.ranking-item .country-score {
+    text-align: right;
+    font-weight: bold;
+}
+
+.ranking-item .country-population {
+    text-align: right;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.ranking-item:hover {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.ranking-item.winner {
+    background: rgba(255, 217, 0, 0.2);
+    border: 1px solid #ffd700;
+}
+
+.ranking-item .rank {
+    font-weight: bold;
+    font-size: 18px;
+    color: #ffd700;
+}
+
+.ranking-item .country-name {
+    font-weight: 600;
+}
+
+.ranking-item .country-score,
+.ranking-item .country-population {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: right;
+}
+
 /* Utilidades */
 .hidden {
     display: none !important;
@@ -635,27 +744,76 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
     .main-panel {
-        grid-template-columns: 1fr;
+        flex-direction: column;
     }
-    
+
     .game-header {
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .stat-item {
-        grid-template-columns: 100px 1fr 50px;
-        gap: 10px;
+        margin-bottom: 15px;
     }
-    
+
     .dev-control {
-        grid-template-columns: 35px 1fr 35px;
+        flex-direction: column;
     }
-    
+
     .dev-btn {
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    .country-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .country-header h2 {
+        margin-bottom: 10px;
+    }
+
+    .country-info {
+        justify-content: center;
+    }
+
+    .population-info {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+
+    .ranking-item {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 8px 15px;
+        text-align: left;
+    }
+
+    .ranking-item .rank {
+        grid-row: 1 / 3;
+        grid-column: 1 / 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+    }
+
+    .ranking-item .country-name {
+        grid-row: 1 / 2;
+        grid-column: 2 / 3;
+        text-align: left;
+    }
+
+    .ranking-item .country-score {
+        grid-row: 2 / 3;
+        grid-column: 2 / 3;
+        text-align: left;
+    }
+
+    .ranking-item .country-population {
+        display: none; /* Ocultar en móviles para simplicidad */
     }
 }
 
@@ -758,7 +916,8 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
-.victory-content {
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    border-color: #ffd700;
+.victory-content #victory-message {
+    text-align: center;
+    font-size: 1.1em;
+    margin-bottom: 20px;
 } 

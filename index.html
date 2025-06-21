@@ -65,7 +65,12 @@
         <!-- Panel principal del país del jugador -->
         <div class="main-panel">
             <div class="player-country-panel">
-                <h2 id="player-country-name">Mi País</h2>
+                <div class="country-header">
+                    <h2 id="player-country-name">Mi País</h2>
+                    <div class="country-info">
+                        <span class="population-info">Población: <span id="player-population">500</span></span>
+                    </div>
+                </div>
                 <div class="stats-container">
                     <div class="stat-item" data-stat="military">
                         <div class="stat-label">⚔️ Militar</div>
@@ -206,35 +211,34 @@
     </div>
 
     <!-- Scripts del juego -->
-    <!-- Lógica central -->
     <script src="js/utils/MathUtils.js"></script>
     <script src="js/utils/RandomUtils.js"></script>
-
-    <!-- Sistema de eventos modular -->
+    
+    <!-- Data -->
     <script src="js/data/events/EventTypes.js"></script>
-    <script src="js/data/events/PersonageEvents.js"></script>
     <script src="js/data/events/CrisisEvents.js"></script>
     <script src="js/data/events/InspirationEvents.js"></script>
     <script src="js/data/events/SpecialEvents.js"></script>
+    <script src="js/data/events/PersonageEvents.js"></script>
     <script src="js/data/events/DevelopmentEvents.js"></script>
-    <script src="js/data/events/EventManager.js"></script>
-
-    <script src="js/data/PersonageGenerator.js"></script>
+    <script src="js/data/events/PopulationEvents.js"></script>
     <script src="js/data/EventData.js"></script>
+    <script src="js/data/events/EventManager.js"></script>
     <script src="js/data/CountryGenerator.js"></script>
-
-    <!-- Componentes de la interfaz de usuario -->
-    <script src="js/ui/StatsDisplay.js"></script>
-    <script src="js/ui/EventModal.js"></script>
-    <script src="js/ui/UIManager.js"></script>
-
-    <!-- Módulos principales del juego -->
+    <script src="js/data/PersonageGenerator.js"></script>
+    
+    <!-- Core -->
     <script src="js/core/CountryManager.js"></script>
     <script src="js/core/EventSystem.js"></script>
     <script src="js/core/AIController.js"></script>
     <script src="js/core/GameLoop.js"></script>
 
-    <!-- Archivo principal del juego -->
+    <!-- UI -->
+    <script src="js/ui/UIManager.js"></script>
+    <script src="js/ui/StatsDisplay.js"></script>
+    <script src="js/ui/EventModal.js"></script>
+    
+    <!-- Main -->
     <script src="js/main.js"></script>
 </body>
 </html> 

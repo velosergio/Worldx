@@ -62,16 +62,23 @@ class EventSystem {
      * Actualiza eventos con duración
      */
     updateEvents() {
+        const expiredEvents = [];
+
+        // Primero, encontrar todos los eventos que han expirado
         this.activeEvents.forEach(event => {
             if (event.duration > 0) {
                 event.duration--;
                 if (event.duration <= 0) {
-                    // Evento expirado, revertir efectos
-                    const country = this.findCountryByEvent(event);
-                    if (country) {
-                        this.removeEvent(event, country);
-                    }
+                    expiredEvents.push(event);
                 }
+            }
+        });
+
+        // Luego, procesar los eventos expirados en un bucle separado
+        expiredEvents.forEach(event => {
+            const country = this.findCountryByEvent(event);
+            if (country) {
+                this.removeEvent(event, country);
             }
         });
     }

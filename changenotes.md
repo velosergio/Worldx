@@ -3,7 +3,7 @@
 ## [Unreleased] - Próximas Características
 
 ### Características Planificadas
-- **Sistema de población**: Agrega un contador de pooblación
+- **Sistema de guerra**: Agrega los conflictos belicos y sus consecuencias / beneficios
 - **Sistema de dinero**: Agrega una variable de dinero
 - **Sistema de Gráficos**: Visualización del mundo con mapas interactivos
 - **Soporte Multiplayer**: Juego multijugador en tiempo real
@@ -15,9 +15,22 @@
 - **Recursos Naturales**: Sistema de recursos y comercio
 - **Formas de Gobierno**: Diferentes sistemas políticos
 - **Sistema de migración**: La población puede cambiar de país
+- **Sistema de bots**: Agrega o elimina bots y modifica su dificultad
+- **IA Avanzada**: Sistema de IA que aprende y mejora
+- **Panel de estadisticas**: Graficos e información relevante
 ---
 
-## [v0.0.0.2] - 2025-06-20
+## [v0.3] - 2025-06-21
+- **Atributos de País**: Cada país ahora tiene `population` y `birthRate`, inicializados en `CountryGenerator.js`.
+- **Crecimiento Semanal**: La población de cada país aumenta cada semana en `main.js` según su tasa de natalidad.
+- **Integración en UI**: La población actual se muestra junto al nombre del país en el panel principal.
+- **Nuevos Eventos de Población**: Se ha creado `PopulationEvents.js` con eventos que afectan directamente a la población y la natalidad (ej. "Baby Boom", "Éxodo Masivo").
+- **Impacto en Eventos Existentes**: Los eventos de crisis (ej. "Plaga Mortal") y de inspiración ("Edades Doradas") ahora pueden afectar a la población y la tasa de natalidad.
+- **Gestión de Efectos**: `EventManager.js` ha sido actualizado para aplicar y revertir los modificadores de población y natalidad.
+- **Mejoras en la Pantalla Final**: La pantalla de victoria ahora muestra un ranking completo de todas las naciones.
+- **Tabla de Clasificación**: Incluye la posición, nombre del país, puntuación total y población final, destacando al ganador.
+
+## [v0.2] - 2025-06-20
 
 ### Rebalanceo de Edades Doradas
 - **Condiciones mucho más estrictas** para las edades doradas (eventos de inspiración)
@@ -97,14 +110,14 @@
 
 ### Interfaz de Usuario
 - **Modal de eventos mejorado** con información detallada
-- **Iconos y colores** para identificar tipos de eventos rápidamente
+- **Iconos y colores** para identificar tipos de evento rápidamente
 - **Descripción completa** con efectos, duración y rareza
 - **Historial de eventos** con filtros por tipo
 - **Notificaciones visuales** para eventos importantes
 
 ---
 
-## [v0.0.0.1] - 2024-12-19
+## [v0.1] - 2024-12-19
 
 ### Características Principales
 - **Sistema de estadísticas 5D**: Militar, Social, Cultura, Ciencia, Economía

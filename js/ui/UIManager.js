@@ -210,6 +210,12 @@ class UIManager {
             nameElement.textContent = playerCountry.name;
         }
 
+        // Actualizar población
+        const populationElement = document.getElementById('player-population');
+        if (populationElement) {
+            populationElement.textContent = MathUtils.format(playerCountry.population);
+        }
+
         // Actualizar estadísticas
         Object.keys(playerCountry.stats).forEach(stat => {
             const valueElement = document.getElementById(`${stat}-value`);
@@ -452,26 +458,41 @@ class UIManager {
      */
     showVictoryModal(winner) {
         const modal = document.getElementById('victory-modal');
-        const message = document.getElementById('victory-message');
-        const stats = document.getElementById('final-stats');
-        
-        if (!modal || !message || !stats) return;
+        const messageEl = document.getElementById('victory-message');
+        const statsEl = document.getElementById('final-stats');
 
-        if (winner) {
-            message.textContent = `¡${winner.name} ha alcanzado la victoria!`;
-        } else {
-            message.textContent = '¡El juego ha terminado en empate!';
+        if (!modal || !messageEl || !statsEl || !winner) {
+            console.error('Error: No se pudo encontrar el modal de victoria o sus elementos.');
+            return;
         }
-        
-        // Mostrar estadísticas finales
+
         const allCountries = this.game.countryManager.getAllCountries();
-        let statsHTML = '<h3>Estadísticas Finales:</h3>';
-        allCountries.forEach(country => {
-            const total = Object.values(country.stats).reduce((sum, stat) => sum + stat, 0);
-            statsHTML += `<p><strong>${country.name}:</strong> ${total} puntos totales</p>`;
-        });
-        stats.innerHTML = statsHTML;
+        const rankedCountries = allCountries.map(country => {
+            const totalScore = Object.values(country.stats).reduce((sum, stat) => sum + stat, 0);
+            return { ...country, totalScore };
+        }).sort((a, b) => b.totalScore - a.totalScore);
+
+        const winningStat = Object.keys(winner.stats).find(stat => winner.stats[stat] >= 100) || 'Puntuación';
+        const statDisplayName = EventTypes.getStatDisplayName(winningStat);
+        const victoryTypeMessage = `¡La nación de <strong>${winner.name}</strong> ha alcanzado la Supremacía por <strong>${statDisplayName}</strong>!`;
         
+        messageEl.innerHTML = `<p>${victoryTypeMessage}</p>`;
+
+        let statsHtml = '<ul class="ranking-list">';
+        rankedCountries.forEach((country, index) => {
+            const isWinner = country.id === winner.id;
+            statsHtml += `
+                <li class="ranking-item ${isWinner ? 'winner' : ''}">
+                    <span class="rank">#${index + 1}</span>
+                    <span class="country-name">${country.name} ${isWinner ? '🏆' : ''}</span>
+                    <span class="country-score">${MathUtils.format(country.totalScore)} Pts</span>
+                    <span class="country-population">${MathUtils.format(country.population)} Hab.</span>
+                </li>
+            `;
+        });
+        statsHtml += '</ul>';
+
+        statsEl.innerHTML = statsHtml;
         modal.classList.remove('hidden');
     }
 

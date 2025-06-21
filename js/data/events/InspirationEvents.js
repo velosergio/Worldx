@@ -8,6 +8,7 @@ class InspirationEvents {
                 title: 'Renacimiento Militar',
                 description: 'El pueblo se ha inspirado en las glorias militares del pasado, despertando un fervor patriótico sin precedentes.',
                 effects: { military: 3 },
+                populationEffects: { birthRate: 1.2 },
                 trigger: 'military',
                 conditions: { 
                     military: 9,  // Requiere militar extremadamente alto
@@ -19,6 +20,7 @@ class InspirationEvents {
                 title: 'Movimiento Social Revolucionario',
                 description: 'Un movimiento por la justicia social ha inspirado a toda la nación, creando una ola de reformas progresistas.',
                 effects: { social: 3 },
+                populationEffects: { birthRate: 1.3 },
                 trigger: 'social',
                 conditions: { 
                     social: 9,    // Requiere social extremadamente alto
@@ -30,6 +32,7 @@ class InspirationEvents {
                 title: 'Edad de Oro Cultural',
                 description: 'Una explosión de creatividad artística ha iluminado el país, atrayendo artistas y pensadores de todo el mundo.',
                 effects: { culture: 3 },
+                populationEffects: { birthRate: 1.1 },
                 trigger: 'culture',
                 conditions: { 
                     culture: 9,   // Requiere cultura extremadamente alta
@@ -41,6 +44,7 @@ class InspirationEvents {
                 title: 'Revolución Científica',
                 description: 'Un nuevo paradigma científico ha revolucionado el pensamiento, catapultando al país a la vanguardia del conocimiento.',
                 effects: { science: 3 },
+                populationEffects: { birthRate: 1.2 },
                 trigger: 'science',
                 conditions: { 
                     science: 9,   // Requiere ciencia extremadamente alta
@@ -52,6 +56,7 @@ class InspirationEvents {
                 title: 'Boom Económico Histórico',
                 description: 'Una ola de prosperidad económica sin precedentes ha barrido el país, creando riqueza y oportunidades para todos.',
                 effects: { economy: 3 },
+                populationEffects: { birthRate: 1.4 },
                 trigger: 'economy',
                 conditions: { 
                     economy: 9,   // Requiere economía extremadamente alta

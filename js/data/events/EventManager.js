@@ -9,6 +9,7 @@ class EventManager {
         this.inspirationEvents = new InspirationEvents();
         this.specialEvents = new SpecialEvents();
         this.developmentEvents = new DevelopmentEvents();
+        this.populationEvents = new PopulationEvents();
     }
 
     /**
@@ -22,13 +23,14 @@ class EventManager {
 
         // Probabilidades base con más variedad
         const probabilities = [
-            { type: EventTypes.PERSONAGE, weight: 0.25 },
-            { type: EventTypes.CRISIS, weight: 0.20 },
-            { type: EventTypes.INSPIRATION, weight: 0.15 },
-            { type: EventTypes.MILESTONE, weight: 0.15 },
-            { type: EventTypes.DISCOVERY, weight: 0.10 },
-            { type: EventTypes.CULTURAL, weight: 0.08 },
-            { type: EventTypes.TECHNOLOGICAL, weight: 0.07 }
+            { type: EventTypes.PERSONAGE, weight: 0.20 },
+            { type: EventTypes.CRISIS, weight: 0.18 },
+            { type: EventTypes.INSPIRATION, weight: 0.12 },
+            { type: EventTypes.MILESTONE, weight: 0.12 },
+            { type: EventTypes.DISCOVERY, weight: 0.08 },
+            { type: EventTypes.CULTURAL, weight: 0.07 },
+            { type: EventTypes.TECHNOLOGICAL, weight: 0.06 },
+            { type: EventTypes.POPULATION, weight: 0.17 }
         ];
 
         // Ajustar pesos basados en la situación del país
@@ -67,6 +69,10 @@ class EventManager {
                 
             case EventTypes.TECHNOLOGICAL:
                 event = this.specialEvents.generateTechnologicalEvent(country);
+                break;
+                
+            case EventTypes.POPULATION:
+                event = this.populationEvents.generatePopulationEvent(country, year);
                 break;
         }
         
@@ -143,20 +149,32 @@ class EventManager {
      * @param {Object} country - País afectado
      */
     applyEventEffects(event, country) {
-        if (!event.effects) return;
+        // Aplicar efectos de estadísticas
+        if (event.effects) {
+            if (typeof event.effects === 'object') {
+                Object.keys(event.effects).forEach(stat => {
+                    if (country.stats.hasOwnProperty(stat)) {
+                        let effect = event.effects[stat];
+                        
+                        // Aplicar sinergias
+                        effect = this.calculateSynergyBonus(effect, stat, country.stats, event.type);
+                        
+                        // Aplicar el efecto final
+                        country.stats[stat] = Math.max(0, country.stats[stat] + effect);
+                    }
+                });
+            }
+        }
 
-        if (typeof event.effects === 'object') {
-            Object.keys(event.effects).forEach(stat => {
-                if (country.stats.hasOwnProperty(stat)) {
-                    let effect = event.effects[stat];
-                    
-                    // Aplicar sinergias
-                    effect = this.calculateSynergyBonus(effect, stat, country.stats, event.type);
-                    
-                    // Aplicar el efecto final
-                    country.stats[stat] = Math.max(0, country.stats[stat] + effect);
-                }
-            });
+        // Aplicar efectos de población
+        if (event.populationEffects) {
+            if (event.populationEffects.population) {
+                country.population = Math.max(1, country.population + event.populationEffects.population);
+            }
+            
+            if (event.populationEffects.birthRate) {
+                country.birthRate = Math.max(0.1, country.birthRate * event.populationEffects.birthRate);
+            }
         }
     }
 
@@ -199,15 +217,24 @@ class EventManager {
      * @param {Object} country - País afectado
      */
     revertEventEffects(event, country) {
-        if (!event.effects) return;
+        // Revertir efectos de estadísticas
+        if (event.effects) {
+            if (typeof event.effects === 'object') {
+                Object.keys(event.effects).forEach(stat => {
+                    if (country.stats.hasOwnProperty(stat)) {
+                        // Solo revertir el efecto base, no las sinergias
+                        country.stats[stat] = Math.max(0, country.stats[stat] - event.effects[stat]);
+                    }
+                });
+            }
+        }
 
-        if (typeof event.effects === 'object') {
-            Object.keys(event.effects).forEach(stat => {
-                if (country.stats.hasOwnProperty(stat)) {
-                    // Solo revertir el efecto base, no las sinergias
-                    country.stats[stat] = Math.max(0, country.stats[stat] - event.effects[stat]);
-                }
-            });
+        // Revertir efectos de población (solo para efectos temporales)
+        if (event.populationEffects && event.duration > 0) {
+            if (event.populationEffects.birthRate) {
+                // Revertir el multiplicador de natalidad
+                country.birthRate = Math.max(0.1, country.birthRate / event.populationEffects.birthRate);
+            }
         }
     }
 

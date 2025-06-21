@@ -92,6 +92,10 @@ class CountryGenerator {
                 economy: 0
             },
 
+            // Sistema de población
+            population: 500, // Población inicial fija
+            birthRate: 1.0, // Multiplicador de natalidad (1.0 = normal)
+
             // Estado del juego
             goldenAgeActivated: false,
             goldenAgeTriggered: false,
@@ -99,7 +103,6 @@ class CountryGenerator {
             history: [],
             
             // Información adicional
-            population: this.generatePopulation(),
             capital: this.generateCapital(name),
             government: this.generateGovernment(theme),
             religion: this.generateReligion(theme),
@@ -303,14 +306,6 @@ class CountryGenerator {
         ];
 
         return RandomUtils.randomChoice(strategies);
-    }
-
-    /**
-     * Genera población inicial
-     * @returns {number} Población
-     */
-    generatePopulation() {
-        return RandomUtils.random(100000, 5000000);
     }
 
     /**
