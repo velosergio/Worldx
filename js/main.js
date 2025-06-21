@@ -354,13 +354,16 @@ class WorldxGame {
     /**
      * Termina el juego
      */
-    endGame(winner = null) {
+    endGame(winner = null, customMessage = null) {
         this.gameState = 'gameOver';
         this.gameLoop.stop();
 
-        if (winner) {
+        if (customMessage) {
+            this.uiManager.showVictoryModal(winner, customMessage);
+        } else if (winner) {
             this.uiManager.showVictoryModal(winner);
         } else {
+            // Si no hay ganador, el que tenga más puntos gana
             const allCountries = this.countryManager.getAllCountries();
             const rankedCountries = allCountries.map(c => ({...c, totalScore: Object.values(c.stats).reduce((s, v) => s + v, 0)})).sort((a,b) => b.totalScore - a.totalScore);
             this.uiManager.showVictoryModal(rankedCountries[0]);
@@ -485,6 +488,16 @@ class WorldxGame {
         if (!playerCountry) return [];
         
         return this.countryManager.getOtherCountriesIntel(playerCountry.id);
+    }
+
+    /**
+     * Obtiene los países enemigos que se pueden atacar
+     */
+    getAttackableEnemies() {
+        const playerCountry = this.getPlayerCountry();
+        if (!playerCountry) return [];
+        
+        return this.countryManager.getAttackableEnemies(playerCountry.id);
     }
 
     startGameLoop() {

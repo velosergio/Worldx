@@ -80,7 +80,6 @@
                         <div class="stat-value" id="military-value">0</div>
                         <div class="stat-dev-control">
                             <button class="dev-btn" data-action="add" data-stat="military">+</button>
-                            <span class="dev-value" data-stat-pending="military">+0</span>
                         </div>
                     </div>
                     <div class="stat-item" data-stat="social">
@@ -91,7 +90,6 @@
                         <div class="stat-value" id="social-value">0</div>
                         <div class="stat-dev-control">
                             <button class="dev-btn" data-action="add" data-stat="social">+</button>
-                            <span class="dev-value" data-stat-pending="social">+0</span>
                         </div>
                     </div>
                     <div class="stat-item" data-stat="culture">
@@ -102,7 +100,6 @@
                         <div class="stat-value" id="culture-value">0</div>
                         <div class="stat-dev-control">
                             <button class="dev-btn" data-action="add" data-stat="culture">+</button>
-                            <span class="dev-value" data-stat-pending="culture">+0</span>
                         </div>
                     </div>
                     <div class="stat-item" data-stat="science">
@@ -113,7 +110,6 @@
                         <div class="stat-value" id="science-value">0</div>
                         <div class="stat-dev-control">
                             <button class="dev-btn" data-action="add" data-stat="science">+</button>
-                            <span class="dev-value" data-stat-pending="science">+0</span>
                         </div>
                     </div>
                     <div class="stat-item" data-stat="economy">
@@ -124,15 +120,74 @@
                         <div class="stat-value" id="economy-value">0</div>
                         <div class="stat-dev-control">
                             <button class="dev-btn" data-action="add" data-stat="economy">+</button>
-                            <span class="dev-value" data-stat-pending="economy">+0</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="global-development-panel">
                     <h3>Puntos de Desarrollo: <span id="available-points">10</span></h3>
-                    <div class="global-dev-buttons">
-                        <button id="apply-development" class="apply-btn">Aplicar Desarrollo</button>
+                </div>
+            </div>
+
+            <!-- Panel del Ministerio de Guerra -->
+            <div class="war-ministry-panel">
+                <h3>🏛️ Ministerio de Guerra</h3>
+                <div class="war-stats">
+                    <div class="war-stat-item">
+                        <div class="war-stat-label">⚔️ Ejército</div>
+                        <div class="war-stat-value">
+                            <span id="army-current">0</span> / <span id="army-max">200</span>
+                            <div class="war-stat-bar">
+                                <div class="war-stat-fill" id="army-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="war-stat-item">
+                        <div class="war-stat-label">🎖️ Experiencia</div>
+                        <div class="war-stat-value">
+                            <span id="army-experience">1</span>/10
+                            <div class="experience-stars">
+                                <span class="star" data-level="1">⭐</span>
+                                <span class="star" data-level="2">⭐</span>
+                                <span class="star" data-level="3">⭐</span>
+                                <span class="star" data-level="4">⭐</span>
+                                <span class="star" data-level="5">⭐</span>
+                                <span class="star" data-level="6">⭐</span>
+                                <span class="star" data-level="7">⭐</span>
+                                <span class="star" data-level="8">⭐</span>
+                                <span class="star" data-level="9">⭐</span>
+                                <span class="star" data-level="10">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="war-stat-item">
+                        <div class="war-stat-label">💪 Poder Militar</div>
+                        <div class="war-stat-value">
+                            <span id="military-power">0</span>
+                        </div>
+                    </div>
+                    <div class="war-stat-item">
+                        <div class="war-stat-label">🏆 Poder Total</div>
+                        <div class="war-stat-value">
+                            <span id="total-power">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="war-actions">
+                    <div class="war-action-item">
+                        <button id="increase-army-btn" class="war-btn">📈 Aumentar Ejército</button>
+                        <div class="war-cost" id="increase-army-cost">
+                            Costo: Social -1, Economía -1
+                        </div>
+                    </div>
+                    <div class="war-action-item">
+                        <button id="train-army-btn" class="war-btn">🎯 Entrenar Ejército</button>
+                        <div class="war-cost" id="train-army-cost">
+                            Costo: Militar -10
+                        </div>
+                    </div>
+                    <div class="war-action-item full-width">
+                        <button id="attack-btn" class="war-btn attack">⚔️ Atacar</button>
                     </div>
                 </div>
             </div>
@@ -210,6 +265,19 @@
         </div>
     </div>
 
+    <!-- Modal de Batalla -->
+    <div id="battle-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="battle-modal-title">Lanzar Ataque</h2>
+                <button class="close-btn" id="close-battle-modal">×</button>
+            </div>
+            <div class="modal-body" id="battle-modal-body">
+                <!-- Contenido dinámico del modal de batalla -->
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts del juego -->
     <script src="js/utils/MathUtils.js"></script>
     <script src="js/utils/RandomUtils.js"></script>
@@ -222,6 +290,7 @@
     <script src="js/data/events/PersonageEvents.js"></script>
     <script src="js/data/events/DevelopmentEvents.js"></script>
     <script src="js/data/events/PopulationEvents.js"></script>
+    <script src="js/data/events/MilitaryEvents.js"></script>
     <script src="js/data/EventData.js"></script>
     <script src="js/data/events/EventManager.js"></script>
     <script src="js/data/CountryGenerator.js"></script>

@@ -11,10 +11,12 @@ En WorldX, tu objetivo es desarrollar tu nación en cinco áreas clave: **Milita
 ## ✨ Características Principales
 
 *   **Sistema de Estadísticas 5D**: Equilibra el desarrollo entre Militar, Social, Cultura, Ciencia y Economía.
-*   **Eventos Dinámicos**: Más de 50 eventos únicos que afectan el curso de tu nación, desde crisis devastadoras hasta inspiraciones gloriosas.
+*   **Ministerio de Guerra**: Gestiona tu ejército, entrénalo, aumenta su poder y lánzate a la conquista.
+*   **Sistema de Batalla**: Simula batallas contra otras naciones con consecuencias estratégicas como la conquista o el arrasamiento de tierras.
+*   **Eventos Dinámicos**: Más de 60 eventos únicos que afectan el curso de tu nación, desde crisis devastadoras hasta inspiraciones gloriosas.
 *   **Generación Procedural**: Cada partida es única, con nombres de países, temas culturales y estrategias de IA generados al azar.
-*   **IA Competitiva**: Enfréntate a 2 oponentes controlados por la IA con 5 estrategias diferentes (agresiva, conservadora, científica, etc.).
-*   **Sistema de Desarrollo**: Asigna puntos de desarrollo semanales para dar forma al destino de tu nación.
+*   **IA Competitiva**: Enfréntate a 2 oponentes controlados por IA con 5 estrategias diferentes, ahora capaces de gestionar su propio ejército, lanzar ataques y tomar decisiones estratégicas en la guerra.
+*   **Sistema de Desarrollo Simplificado**: Asigna puntos de desarrollo semanales de forma instantánea para dar forma al destino de tu nación.
 *   **Guardado y Carga**: Guarda tu progreso en cualquier momento y continúa tu partida más tarde.
 *   **Controles de Tiempo**: Pausa el juego o acelera el tiempo (x1, x2, x4) para jugar a tu propio ritmo.
 *   **Interfaz Moderna**: Una interfaz de usuario limpia e intuitiva con animaciones fluidas.
@@ -24,10 +26,9 @@ En WorldX, tu objetivo es desarrollar tu nación en cinco áreas clave: **Milita
 1.  **Abre `index.html`** en tu navegador web.
 2.  Haz clic en **"Nueva Partida"**.
 3.  Elige un nombre para tu nación o genera uno al azar.
-4.  Asigna tus puntos de desarrollo iniciales a las estadísticas que prefieras.
-5.  Haz clic en **"Aplicar Desarrollo"** para confirmar tus elecciones.
-6.  Controla el paso del tiempo con los botones de velocidad.
-7.  ¡Alcanza **100 puntos** en cualquier estadística para ganar el juego!
+4.  Asigna tus puntos de desarrollo haciendo clic en los botones `+` junto a cada estadística.
+5.  Controla el paso del tiempo con los botones de velocidad.
+6.  ¡Alcanza **100 puntos** en cualquier estadística o **conquista a todas las demás naciones** para ganar el juego!
 
 ## 🛠️ Tecnologías Utilizadas
 

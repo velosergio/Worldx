@@ -15,6 +15,7 @@ class EventTypes {
     static SOCIAL = 'social';
     static NATURAL = 'natural';
     static POPULATION = 'population';
+    static MILITARY = 'military';
 
     /**
      * Obtiene todos los tipos de eventos
@@ -33,7 +34,8 @@ class EventTypes {
             ECONOMIC: this.ECONOMIC,
             SOCIAL: this.SOCIAL,
             NATURAL: this.NATURAL,
-            POPULATION: this.POPULATION
+            POPULATION: this.POPULATION,
+            MILITARY: this.MILITARY
         };
     }
 
@@ -52,7 +54,8 @@ class EventTypes {
             [this.CULTURAL]: '#ff8844', // Naranja
             [this.TECHNOLOGICAL]: '#44ffff', // Cian
             [this.DEVELOPMENT]: '#888888', // Gris
-            [this.POPULATION]: '#ff66cc' // Rosa
+            [this.POPULATION]: '#ff66cc', // Rosa
+            [this.MILITARY]: '#ff6600' // Naranja militar
         };
         
         return colors[eventType] || '#ffffff';
@@ -73,7 +76,8 @@ class EventTypes {
             [this.CULTURAL]: '🎭',
             [this.TECHNOLOGICAL]: '⚙️',
             [this.DEVELOPMENT]: '📈',
-            [this.POPULATION]: '👥'
+            [this.POPULATION]: '👥',
+            [this.MILITARY]: '⚔️'
         };
         
         return icons[eventType] || '📋';

@@ -33,13 +33,22 @@ class AIController {
      * Toma una decisión para un país específico
      */
     makeDecision(country) {
-        const strategy = country.aiStrategy;
+        // 1. Decisión de Desarrollo (asignar puntos)
+        this.makeDevelopmentDecision(country);
+
+        // 2. Decisión Militar (gastar recursos y estadísticas)
+        this.makeMilitaryDecision(country);
+    }
+
+    /**
+     * Toma decisiones sobre cómo asignar los puntos de desarrollo.
+     */
+    makeDevelopmentDecision(country) {
         const availablePoints = country.developmentPoints;
-        
         if (availablePoints <= 0) return;
 
         // Obtener pesos según la estrategia
-        const weights = this.decisionWeights[strategy.name] || this.decisionWeights.conservative;
+        const weights = this.decisionWeights[country.aiStrategy.name] || this.decisionWeights.conservative;
         
         // Calcular distribución de puntos
         const development = this.calculateDevelopment(weights, availablePoints, country);
@@ -47,9 +56,140 @@ class AIController {
         // Aplicar desarrollo
         if (this.countryManager) {
             this.countryManager.applyDevelopment(country.id, development);
+            console.log(`IA ${country.name} (${country.aiStrategy.name}) invierte en desarrollo: ${JSON.stringify(development)}`);
+        }
+    }
+
+    /**
+     * Toma decisiones militares como entrenar, aumentar ejército o atacar.
+     */
+    makeMilitaryDecision(country) {
+        if (!this.countryManager) return;
+
+        // Decisión de entrenar (prioridad alta para usar puntos militares)
+        if (this.shouldTrainArmy(country)) {
+            this.countryManager.trainArmy(country.id);
+            console.log(`IA ${country.name} ha entrenado a su ejército.`);
+        }
+
+        // Decisión de aumentar el ejército
+        if (this.shouldIncreaseArmy(country)) {
+            this.countryManager.increaseArmy(country.id);
+            console.log(`IA ${country.name} ha aumentado su ejército.`);
+        }
+
+        // Decisión de atacar
+        const target = this.shouldAttack(country);
+        if (target) {
+            console.log(`IA ${country.name} está atacando a ${target.name}!`);
+            const battleReport = this.countryManager.simulateBattle(country.id, target.id);
+            this.handleBattleAftermath(country, target, battleReport);
+        }
+    }
+
+    /**
+     * Lógica para que la IA decida qué hacer después de una batalla que ha ganado.
+     */
+    handleBattleAftermath(attacker, defender, report) {
+        if (report.result === 'Victoria') {
+            console.log(`IA ${attacker.name} ha derrotado a ${defender.name}.`);
+            
+            // Lógica de decisión post-victoria de la IA
+            const decision = this.decidePostBattleAction(attacker, defender);
+
+            switch(decision) {
+                case 'conquer':
+                    this.countryManager.conquerCountry(attacker.id, defender.id);
+                    console.log(`IA ${attacker.name} ha conquistado a ${defender.name}.`);
+                    if (defender.isPlayer) {
+                        window.worldxGame.endGame(attacker, `${attacker.name} ha conquistado tu nación.`);
+                    }
+                    break;
+                case 'raze':
+                    this.countryManager.razeCountry(attacker.id, defender.id);
+                    console.log(`IA ${attacker.name} ha arrasado a ${defender.name}.`);
+                    if (defender.isPlayer) {
+                        window.worldxGame.showNotification(`${attacker.name} ha arrasado tus tierras.`);
+                    }
+                    break;
+                case 'nothing':
+                default:
+                    console.log(`IA ${attacker.name} se retira tras la batalla contra ${defender.name}.`);
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Toma la decisión de qué hacer después de una victoria.
+     * @returns {'conquer'|'raze'|'nothing'}
+     */
+    decidePostBattleAction(attacker, defender) {
+        const canConquer = defender.army <= 0;
+
+        if (canConquer) {
+            // Si puede conquistar, hay una alta probabilidad de que lo haga
+            if (RandomUtils.random(0, 1) < 0.7) return 'conquer'; // 70% de probabilidad
+        }
+
+        // Si no puede conquistar o falló el 70%, arrasará
+        return 'raze';
+    }
+
+    /**
+     * Decide si la IA debe entrenar a su ejército.
+     */
+    shouldTrainArmy(country) {
+        // Entrenar si tiene más de 15 puntos militares y no está al máximo nivel
+        return this.countryManager.canTrainArmy(country) && country.stats.military > 15;
+    }
+
+    /**
+     * Decide si la IA debe aumentar su ejército.
+     */
+    shouldIncreaseArmy(country) {
+        const armyInfo = this.countryManager.getArmyInfo(country);
+        const cost = armyInfo.increaseCost;
+
+        // Aumentar si tiene menos del 50% del ejército máximo y puede costearlo
+        if (armyInfo.percentage < 50 && country.stats.social > cost.social + 5 && country.stats.economy > cost.economy + 5) {
+             return this.countryManager.canIncreaseArmy(country);
+        }
+        return false;
+    }
+
+    /**
+     * Decide si la IA debe atacar y a quién.
+     * @returns {object|null} - El país objetivo o null.
+     */
+    shouldAttack(country) {
+        const myPower = this.countryManager.getMilitaryPower(country);
+        if (myPower < 20) return null; // No atacar si es muy débil
+
+        const potentialTargets = this.countryManager.getAllCountries().filter(c => c.id !== country.id && c.isActive);
+
+        let bestTarget = null;
+        let highestPowerRatio = 1.0;
+
+        for (const target of potentialTargets) {
+            const targetPower = this.countryManager.getMilitaryPower(target);
+            const powerRatio = myPower / (targetPower + 1);
+
+            // La IA agresiva necesita menos ventaja para atacar
+            const requiredRatio = country.aiStrategy.name === 'aggressive' ? 1.2 : 1.5;
+
+            if (powerRatio > requiredRatio && powerRatio > highestPowerRatio) {
+                highestPowerRatio = powerRatio;
+                bestTarget = target;
+            }
         }
         
-        console.log(`IA ${country.name} (${strategy.name}): ${JSON.stringify(development)}`);
+        // Para evitar ataques constantes, añadir una probabilidad
+        if (bestTarget && RandomUtils.random(0, 1) < 0.25) { // 25% de probabilidad de atacar por turno si hay un buen objetivo
+            return bestTarget;
+        }
+
+        return null;
     }
 
     /**

@@ -10,6 +10,7 @@ class EventManager {
         this.specialEvents = new SpecialEvents();
         this.developmentEvents = new DevelopmentEvents();
         this.populationEvents = new PopulationEvents();
+        this.militaryEvents = new MilitaryEvents();
     }
 
     /**
@@ -23,14 +24,15 @@ class EventManager {
 
         // Probabilidades base con más variedad
         const probabilities = [
-            { type: EventTypes.PERSONAGE, weight: 0.20 },
-            { type: EventTypes.CRISIS, weight: 0.18 },
-            { type: EventTypes.INSPIRATION, weight: 0.12 },
-            { type: EventTypes.MILESTONE, weight: 0.12 },
-            { type: EventTypes.DISCOVERY, weight: 0.08 },
-            { type: EventTypes.CULTURAL, weight: 0.07 },
-            { type: EventTypes.TECHNOLOGICAL, weight: 0.06 },
-            { type: EventTypes.POPULATION, weight: 0.17 }
+            { type: EventTypes.PERSONAGE, weight: 0.18 },
+            { type: EventTypes.CRISIS, weight: 0.16 },
+            { type: EventTypes.INSPIRATION, weight: 0.10 },
+            { type: EventTypes.MILESTONE, weight: 0.10 },
+            { type: EventTypes.DISCOVERY, weight: 0.07 },
+            { type: EventTypes.CULTURAL, weight: 0.06 },
+            { type: EventTypes.TECHNOLOGICAL, weight: 0.05 },
+            { type: EventTypes.POPULATION, weight: 0.15 },
+            { type: EventTypes.MILITARY, weight: 0.13 }
         ];
 
         // Ajustar pesos basados en la situación del país
@@ -73,6 +75,10 @@ class EventManager {
                 
             case EventTypes.POPULATION:
                 event = this.populationEvents.generatePopulationEvent(country, year);
+                break;
+                
+            case EventTypes.MILITARY:
+                event = this.militaryEvents.generateMilitaryEvent(country, year);
                 break;
         }
         
@@ -138,6 +144,12 @@ class EventManager {
             if (techEvent) techEvent.weight *= 1.5;
         }
 
+        // Más eventos militares cuando tienes poder militar alto
+        if (stats.military > 4) {
+            const militaryEvent = probabilities.find(p => p.type === EventTypes.MILITARY);
+            if (militaryEvent) militaryEvent.weight *= 1.5;
+        }
+
         // Normalizar probabilidades
         const totalWeight = probabilities.reduce((sum, p) => sum + p.weight, 0);
         probabilities.forEach(p => p.weight /= totalWeight);
@@ -174,6 +186,26 @@ class EventManager {
             
             if (event.populationEffects.birthRate) {
                 country.birthRate = Math.max(0.1, country.birthRate * event.populationEffects.birthRate);
+            }
+        }
+
+        // Aplicar efectos militares
+        if (event.militaryEffects) {
+            if (event.militaryEffects.army !== undefined) {
+                if (event.militaryEffects.army > 0) {
+                    // Aumentar ejército
+                    const increaseAmount = Math.floor(country.population * event.militaryEffects.army);
+                    const maxArmy = Math.floor(country.population * 0.4);
+                    country.army = Math.min(maxArmy, country.army + increaseAmount);
+                } else {
+                    // Reducir ejército
+                    const decreaseAmount = Math.floor(country.army * Math.abs(event.militaryEffects.army));
+                    country.army = Math.max(0, country.army - decreaseAmount);
+                }
+            }
+            
+            if (event.militaryEffects.armyExperience !== undefined) {
+                country.armyExperience = Math.max(1, Math.min(10, country.armyExperience + event.militaryEffects.armyExperience));
             }
         }
     }
@@ -234,6 +266,13 @@ class EventManager {
             if (event.populationEffects.birthRate) {
                 // Revertir el multiplicador de natalidad
                 country.birthRate = Math.max(0.1, country.birthRate / event.populationEffects.birthRate);
+            }
+        }
+
+        // Revertir efectos militares (solo para efectos temporales)
+        if (event.militaryEffects && event.duration > 0) {
+            if (event.militaryEffects.armyExperience !== undefined) {
+                country.armyExperience = Math.max(1, Math.min(10, country.armyExperience - event.militaryEffects.armyExperience));
             }
         }
     }

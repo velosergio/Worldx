@@ -18,7 +18,78 @@
 - **Sistema de bots**: Agrega o elimina bots y modifica su dificultad
 - **IA Avanzada**: Sistema de IA que aprende y mejora
 - **Panel de estadisticas**: Graficos e información relevante
+- **Ciudadanos destacados**: Personajes clave para el desarrollo
+- **Sistema de Alimentos**: Seguridad alimentaria
+- **Sistema de Empleo**: Seguridad laboral
+- **Sistema de Infraestructura**: Buff y Debuff relevantes
+- **Sistema Industria**: Producción de bienes y servicios 
+- **Sistema de Infamia**: Reputación, fama: buffos y debuff 
+- **Sistema de Inteigencia**: Espionaje y contraespionaje.
+- **Sistema de Territorio**: Expandirse, fundar ciudades, enviar colonos
 ---
+
+## [v0.4] - 2025-06-21
+
+### Sistema de Batalla y Conquista
+- **Ataques entre naciones**: Los jugadores y la IA pueden lanzar ataques desde el Ministerio de Guerra.
+- **Modal de Ataque**: Nueva interfaz para seleccionar un objetivo, mostrando inteligencia clave como población, poder y ejército del enemigo.
+- **Simulación de Batalla**: Un nuevo algoritmo en `CountryManager.js` calcula el resultado de la batalla (Victoria, Derrota, Empate) y las bajas para ambos bandos.
+- **Consecuencias de la Batalla**:
+    - **Victoria**: El vencedor puede elegir entre "Arrasar" (robar 25% de los puntos de desarrollo) o "Conquistar".
+    - **Conquista**: Si el ejército enemigo es aniquilado, el vencedor puede anexionar el país, absorbiendo su población y el 10% de su desarrollo, eliminándolo del juego.
+    - **Derrota**: La nación derrotada es arrasada por el vencedor. Si el jugador pierde toda su población, pierde la partida.
+- **Condición de Victoria por Conquista**: Se puede ganar el juego eliminando a todas las demás naciones del mapa.
+
+### IA Militar Inteligente
+- **Gestión Autónoma del Ejército**: La IA ahora decide cuándo aumentar su ejército y entrenar sus tropas basándose en su estrategia y recursos.
+- **Decisiones de Ataque Estratégicas**: La IA evalúa su poder militar contra el de sus rivales y solo ataca si tiene una ventaja estratégica clara (ej. 1.3x más poder).
+- **Lógica Post-Batalla Avanzada**: Si la IA gana una batalla, decidirá de forma inteligente entre conquistar el territorio enemigo, arrasar sus tierras para obtener recursos o retirarse si ha sufrido demasiadas bajas.
+
+### Simplificación del Sistema de Desarrollo
+- **Eliminación del botón "Aplicar Desarrollo"**: Ya no es necesario hacer clic en un botón separado para aplicar los puntos de desarrollo.
+- **Aplicación inmediata de puntos**: Al hacer clic en el botón "+" de cada atributo, los puntos se aplican inmediatamente sin acumulación pendiente.
+- **Interfaz simplificada**: Eliminación de elementos visuales innecesarios como contadores de puntos pendientes.
+- **Código más limpio**: Eliminación de lógica de estado pendiente en `UIManager.js`.
+
+### Sistema del Ministerio de Guerra
+- **Panel de gestión militar**: Nuevo panel ubicado entre el país del jugador y el intel de otros países.
+- **Sistema de ejército**: Cada país tiene un ejército con un máximo del 40% de su población total.
+- **Nivel de experiencia**: Sistema de experiencia del ejército de 1 a 10 niveles que actúa como multiplicador de poder.
+- **Poder militar**: Cálculo basado en estadística militar × experiencia + bonus por tamaño del ejército.
+- **Poder total**: Suma de todas las estadísticas + poder militar para ranking general.
+
+### Eventos Militares
+- **12 eventos militares únicos**: 6 eventos positivos y 6 eventos negativos que afectan el poder militar.
+- **Eventos positivos**: Victoria Épica, Reclutamiento Masivo, Entrenamiento Avanzado, Alianza Militar, Innovación Tecnológica, Héroe Nacional.
+- **Eventos negativos**: Derrota Desastrosa, Deserción Masiva, Escasez de Equipamiento, Conflicto Interno, Enfermedad en el Ejército, Sabotaje Enemigo.
+- **Efectos militares**: Modifican directamente el tamaño del ejército y la experiencia militar.
+- **Condiciones específicas**: Cada evento requiere estadísticas mínimas para activarse.
+- **Sistema de rareza**: Eventos comunes, poco comunes y raros con diferentes probabilidades.
+- **Integración completa**: Los eventos militares se generan automáticamente junto con otros tipos de eventos.
+
+### Acciones del Ministerio de Guerra
+- **Aumentar Ejército**: Incrementa el ejército en un 10% de la población, con costos crecientes en Social y Economía.
+- **Entrenar Ejército**: Aumenta el nivel de experiencia en 1, con costo fijo de 10 puntos de poder militar.
+- **Costos dinámicos**: Los costos para aumentar el ejército se incrementan con cada mejora realizada.
+- **Validaciones**: Verificación de recursos disponibles y límites máximos antes de permitir acciones.
+
+### Correcciones y Mejoras
+- **Coherencia Visual de la UI**: Se ha restaurado el estilo original de los botones del Ministerio de Guerra para que sea consistente con el resto de la interfaz.
+- **Corrección del Panel de Intel**: Solucionado un error que provocaba que la fuerza y los rumores de las naciones IA se mostraran como `undefined`.
+- **Estabilidad del Modal de Ataque**: Corregido un error crítico que causaba que el juego se bloqueara al intentar abrir el modal de ataque.
+- **Mejora en Pantalla de Victoria**: Añadido un indicador "(Tú)" para resaltar al jugador en la tabla de clasificación final.
+
+### Archivos Modificados
+- **`js/ui/UIManager.js`**: Lógica de desarrollo simplificada, gestión del Ministerio de Guerra, sistema de batalla completo y correcciones de errores.
+- **`js/core/CountryManager.js`**: Implementación de la lógica militar (ejército, poder, batallas), conquista, arrasamiento y corrección de funciones de intel.
+- **`js/core/AIController.js`**: Nueva lógica de IA para gestionar su ejército, atacar y tomar decisiones post-batalla.
+- **`js/main.js`**: Integración de la nueva lógica de victoria por conquista y funciones de apoyo para la batalla.
+- **`index.html`**: Eliminado el sistema de desarrollo pendiente, añadido el panel del Ministerio de Guerra y el modal de batalla.
+- **`styles/main.css`**: Estilos actualizados para el desarrollo, el nuevo panel militar y correcciones de botones.
+- **`js/data/CountryGenerator.js`**: Añadidas propiedades militares (`army`, `armyExperience`) a los países.
+- **`js/data/events/MilitaryEvents.js`**: Nuevo archivo con 12 eventos militares únicos.
+- **`js/data/events/EventTypes.js`**: Agregado el tipo de evento `MILITARY`.
+- **`js/data/events/EventManager.js`**: Integración de los nuevos eventos militares.
 
 ## [v0.3] - 2025-06-21
 - **Atributos de País**: Cada país ahora tiene `population` y `birthRate`, inicializados en `CountryGenerator.js`.

@@ -96,7 +96,13 @@ class CountryGenerator {
             population: 500, // Población inicial fija
             birthRate: 1.0, // Multiplicador de natalidad (1.0 = normal)
 
+            // Sistema militar
+            army: 0, // Número de tropas (máximo 40% de población)
+            armyExperience: 1, // Nivel de experiencia del ejército (1-10)
+            armyUpgrades: 0, // Número de mejoras de ejército realizadas
+
             // Estado del juego
+            isActive: true, // El país está activo en el juego
             goldenAgeActivated: false,
             goldenAgeTriggered: false,
             events: [],
