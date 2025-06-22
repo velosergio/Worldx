@@ -133,6 +133,9 @@ class WorldxGame {
         // Actualizar población de todos los países
         this.updatePopulation();
         
+        // Actualizar economía de todos los países
+        this.countryManager.updateEconomy();
+        
         // Añadir puntos de desarrollo semanales
         this.countryManager.addAnnualDevelopmentPoints(1);
         
@@ -160,7 +163,22 @@ class WorldxGame {
         // Actualizar UI
         this.uiManager.updateDisplay();
         
-        console.log(`Semana ${this.currentYear} completada`);
+        // Registrar resumen de la semana en la consola
+        console.log(`--- Resumen Semana ${this.currentYear} ---`);
+        this.countryManager.getAllCountries().forEach(country => {
+            if (country.isActive) {
+                // Usar el método avanzado para obtener info económica completa
+                const economy = this.countryManager.getAdvancedEconomicInfo(country.id);
+                const military = this.countryManager.getArmyInfo(country);
+                
+                if (economy && military) {
+                    const netIncome = economy.totalIncome - economy.armyMaintenanceCost;
+                    console.log(
+                        `[${country.name}] Población: ${country.population} | Dinero: ${Math.floor(economy.money)} (${netIncome >= 0 ? '+' : ''}${netIncome.toFixed(0)}) | Ejército: ${military.current} (Nvl ${military.experience})`
+                    );
+                }
+            }
+        });
     }
 
     /**

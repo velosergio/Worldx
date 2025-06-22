@@ -68,7 +68,13 @@
                 <div class="country-header">
                     <h2 id="player-country-name">Mi País</h2>
                     <div class="country-info">
-                        <span class="population-info">Población: <span id="player-population">500</span></span>
+                        <div class="info-widget">
+                            <span>👥 Población: <span id="player-population" class="widget-value">500</span></span>
+                        </div>
+                        <div class="info-widget economy-info">
+                            <div id="player-money">$0</div>
+                            <div id="player-income" class="widget-income">(+0)</div>
+                        </div>
                     </div>
                 </div>
                 <div class="stats-container">
@@ -129,73 +135,274 @@
                 </div>
             </div>
 
-            <!-- Panel del Ministerio de Guerra -->
-            <div class="war-ministry-panel">
-                <h3>🏛️ Ministerio de Guerra</h3>
-                <div class="war-stats">
-                    <div class="war-stat-item">
-                        <div class="war-stat-label">⚔️ Ejército</div>
-                        <div class="war-stat-value">
-                            <span id="army-current">0</span> / <span id="army-max">200</span>
-                            <div class="war-stat-bar">
-                                <div class="war-stat-fill" id="army-fill"></div>
+            <div class="side-panel">
+                <!-- Panel del Ministerio de Guerra -->
+                <div class="war-ministry-panel">
+                    <h3>🏛️ Ministerio de Guerra</h3>
+                    <div class="war-stats">
+                        <div class="war-stat-item">
+                            <div class="war-stat-label">⚔️ Ejército</div>
+                            <div class="war-stat-value">
+                                <span id="army-current">0</span> / <span id="army-max">200</span>
+                                <div class="war-stat-bar">
+                                    <div class="war-stat-fill" id="army-fill"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="war-stat-item">
+                            <div class="war-stat-label">🎖️ Experiencia</div>
+                            <div class="war-stat-value">
+                                <span id="army-experience">1</span>/10
+                                <div class="experience-stars">
+                                    <span class="star" data-level="1">⭐</span>
+                                    <span class="star" data-level="2">⭐</span>
+                                    <span class="star" data-level="3">⭐</span>
+                                    <span class="star" data-level="4">⭐</span>
+                                    <span class="star" data-level="5">⭐</span>
+                                    <span class="star" data-level="6">⭐</span>
+                                    <span class="star" data-level="7">⭐</span>
+                                    <span class="star" data-level="8">⭐</span>
+                                    <span class="star" data-level="9">⭐</span>
+                                    <span class="star" data-level="10">⭐</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="war-stat-item">
+                            <div class="war-stat-label">💪 Poder Militar</div>
+                            <div class="war-stat-value">
+                                <span id="military-power">0</span>
+                            </div>
+                        </div>
+                        <div class="war-stat-item">
+                            <div class="war-stat-label">🏆 Poder Total</div>
+                            <div class="war-stat-value">
+                                <span id="total-power">0</span>
                             </div>
                         </div>
                     </div>
-                    <div class="war-stat-item">
-                        <div class="war-stat-label">🎖️ Experiencia</div>
-                        <div class="war-stat-value">
-                            <span id="army-experience">1</span>/10
-                            <div class="experience-stars">
-                                <span class="star" data-level="1">⭐</span>
-                                <span class="star" data-level="2">⭐</span>
-                                <span class="star" data-level="3">⭐</span>
-                                <span class="star" data-level="4">⭐</span>
-                                <span class="star" data-level="5">⭐</span>
-                                <span class="star" data-level="6">⭐</span>
-                                <span class="star" data-level="7">⭐</span>
-                                <span class="star" data-level="8">⭐</span>
-                                <span class="star" data-level="9">⭐</span>
-                                <span class="star" data-level="10">⭐</span>
+                    <div class="war-actions">
+                        <div class="war-action-item">
+                            <button id="increase-army-btn" class="war-btn">📈 Aumentar Ejército</button>
+                            <div class="war-cost" id="increase-army-cost">
+                                Costo: $100, Social -1, Economía -1
                             </div>
                         </div>
-                    </div>
-                    <div class="war-stat-item">
-                        <div class="war-stat-label">💪 Poder Militar</div>
-                        <div class="war-stat-value">
-                            <span id="military-power">0</span>
+                        <div class="war-action-item">
+                            <button id="train-army-btn" class="war-btn">🎯 Entrenar Ejército</button>
+                            <div class="war-cost" id="train-army-cost">
+                                Costo: $200, Militar -1
+                            </div>
                         </div>
-                    </div>
-                    <div class="war-stat-item">
-                        <div class="war-stat-label">🏆 Poder Total</div>
-                        <div class="war-stat-value">
-                            <span id="total-power">0</span>
+                        <div class="war-action-item full-width">
+                            <button id="attack-btn" class="war-btn attack">⚔️ Atacar</button>
                         </div>
                     </div>
                 </div>
-                <div class="war-actions">
-                    <div class="war-action-item">
-                        <button id="increase-army-btn" class="war-btn">📈 Aumentar Ejército</button>
-                        <div class="war-cost" id="increase-army-cost">
-                            Costo: Social -1, Economía -1
+
+                <!-- Panel del Ministerio de Economía -->
+                <div class="economic-ministry-panel">
+                    <h3>🏛️ Ministerio de Economía</h3>
+                    <div class="economic-stats">
+                        <div class="economic-stat-item">
+                            <div class="economic-stat-label">📊 PIB</div>
+                            <div class="economic-stat-value">
+                                <span id="gdp-value">0</span>
+                            </div>
+                        </div>
+                        <div class="economic-stat-item">
+                            <div class="economic-stat-label">📈 Crecimiento</div>
+                            <div class="economic-stat-value">
+                                <span id="growth-rate">0.0</span>%
+                            </div>
+                        </div>
+                        <div class="economic-stat-item">
+                            <div class="economic-stat-label">⚡ Eficiencia</div>
+                            <div class="economic-stat-value">
+                                <span id="efficiency-value">1.00</span>x
+                            </div>
+                        </div>
+                        <div class="economic-stat-item">
+                            <div class="economic-stat-label">🛡️ Estabilidad</div>
+                            <div class="economic-stat-value">
+                                <span id="stability-value">1.00</span>x
+                            </div>
                         </div>
                     </div>
-                    <div class="war-action-item">
-                        <button id="train-army-btn" class="war-btn">🎯 Entrenar Ejército</button>
-                        <div class="war-cost" id="train-army-cost">
-                            Costo: Militar -10
+                    
+                    <!-- Sección de Industrias -->
+                    <div class="economic-section">
+                        <h4>🏭 Industrias</h4>
+                        <div class="industries-grid">
+                            <div class="industry-item" data-industry="basic">
+                                <div class="industry-header">
+                                    <span class="industry-name">Industria Básica</span>
+                                    <span class="industry-level" id="basic-industry-level">0</span>
+                                </div>
+                                <button class="economic-btn" id="build-basic-industry">Construir</button>
+                                <div class="economic-cost" id="basic-industry-cost">Costo: $300, Economía -1</div>
+                                <div class="economic-benefit" id="basic-industry-benefit"></div>
+                            </div>
+                            <div class="industry-item" data-industry="advanced">
+                                <div class="industry-header">
+                                    <span class="industry-name">Industria Avanzada</span>
+                                    <span class="industry-level" id="advanced-industry-level">0</span>
+                                </div>
+                                <button class="economic-btn" id="build-advanced-industry">Construir</button>
+                                <div class="economic-cost" id="advanced-industry-cost">Costo: $600, Ciencia -2, Economía -2</div>
+                                <div class="economic-benefit" id="advanced-industry-benefit"></div>
+                            </div>
+                            <div class="industry-item" data-industry="cultural">
+                                <div class="industry-header">
+                                    <span class="industry-name">Industria Cultural</span>
+                                    <span class="industry-level" id="cultural-industry-level">0</span>
+                                </div>
+                                <button class="economic-btn" id="build-cultural-industry">Construir</button>
+                                <div class="economic-cost" id="cultural-industry-cost">Costo: $500, Cultura -2, Economía -1</div>
+                                <div class="economic-benefit" id="cultural-industry-benefit"></div>
+                            </div>
+                            <div class="industry-item" data-industry="military">
+                                <div class="industry-header">
+                                    <span class="industry-name">Industria Militar</span>
+                                    <span class="industry-level" id="military-industry-level">0</span>
+                                </div>
+                                <button class="economic-btn" id="build-military-industry">Construir</button>
+                                <div class="economic-cost" id="military-industry-cost">Costo: $400, Militar -2, Economía -1</div>
+                                <div class="economic-benefit" id="military-industry-benefit"></div>
+                            </div>
+                            <div class="industry-item" data-industry="tech">
+                                <div class="industry-header">
+                                    <span class="industry-name">Industria Tecnológica</span>
+                                    <span class="industry-level" id="tech-industry-level">0</span>
+                                </div>
+                                <button class="economic-btn" id="build-tech-industry">Construir</button>
+                                <div class="economic-cost" id="tech-industry-cost">Costo: $800, Ciencia -3, Economía -2</div>
+                                <div class="economic-benefit" id="tech-industry-benefit"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="war-action-item full-width">
-                        <button id="attack-btn" class="war-btn attack">⚔️ Atacar</button>
+
+                    <!-- Sección de Infraestructura -->
+                    <div class="economic-section">
+                        <h4>🏗️ Infraestructura</h4>
+                        <div class="infrastructure-grid">
+                            <div class="infrastructure-item" data-infrastructure="roads">
+                                <div class="infrastructure-header">
+                                    <span class="infrastructure-name">Carreteras</span>
+                                    <span class="infrastructure-status" id="roads-status">No construida</span>
+                                </div>
+                                <button class="economic-btn" id="build-roads">Construir</button>
+                                <div class="economic-cost" id="roads-cost">Costo: $500, Economía -2, Social -1</div>
+                                <div class="economic-benefit" id="roads-benefit"></div>
+                            </div>
+                            <div class="infrastructure-item" data-infrastructure="ports">
+                                <div class="infrastructure-header">
+                                    <span class="infrastructure-name">Puertos</span>
+                                    <span class="infrastructure-status" id="ports-status">No construida</span>
+                                </div>
+                                <button class="economic-btn" id="build-ports">Construir</button>
+                                <div class="economic-cost" id="ports-cost">Costo: $800, Economía -3, Ciencia -1</div>
+                                <div class="economic-benefit" id="ports-benefit"></div>
+                            </div>
+                            <div class="infrastructure-item" data-infrastructure="universities">
+                                <div class="infrastructure-header">
+                                    <span class="infrastructure-name">Universidades</span>
+                                    <span class="infrastructure-status" id="universities-status">No construida</span>
+                                </div>
+                                <button class="economic-btn" id="build-universities">Construir</button>
+                                <div class="economic-cost" id="universities-cost">Costo: $1200, Ciencia -3, Economía -2</div>
+                                <div class="economic-benefit" id="universities-benefit"></div>
+                            </div>
+                            <div class="infrastructure-item" data-infrastructure="hospitals">
+                                <div class="infrastructure-header">
+                                    <span class="infrastructure-name">Hospitales</span>
+                                    <span class="infrastructure-status" id="hospitals-status">No construida</span>
+                                </div>
+                                <button class="economic-btn" id="build-hospitals">Construir</button>
+                                <div class="economic-cost" id="hospitals-cost">Costo: $1000, Social -3, Economía -2</div>
+                                <div class="economic-benefit" id="hospitals-benefit"></div>
+                            </div>
+                            <div class="infrastructure-item" data-infrastructure="banks">
+                                <div class="infrastructure-header">
+                                    <span class="infrastructure-name">Bancos</span>
+                                    <span class="infrastructure-status" id="banks-status">No construida</span>
+                                </div>
+                                <button class="economic-btn" id="build-banks">Construir</button>
+                                <div class="economic-cost" id="banks-cost">Costo: $1500, Economía -4, Social -1</div>
+                                <div class="economic-benefit" id="banks-benefit"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección de Finanzas -->
+                    <div class="economic-section">
+                        <h4>📊 Finanzas</h4>
+                        <div id="finance-breakdown" class="finance-breakdown">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Sección de Inversiones -->
+                    <div class="economic-section">
+                        <h4>💰 Inversiones Financieras</h4>
+                        <div class="investment-grid">
+                            <div class="investment-item" data-investment="bonds">
+                                <div class="investment-header">
+                                    <span class="investment-name">Bonos del Estado</span>
+                                    <span class="investment-amount" id="bonds-amount">0</span>
+                                </div>
+                                <button class="economic-btn" id="invest-bonds">Invertir</button>
+                                <div class="economic-cost" id="bonds-cost">Costo: $200</div>
+                                <div class="economic-benefit" id="bonds-benefit"></div>
+                            </div>
+                            <div class="investment-item" data-investment="development-fund">
+                                <div class="investment-header">
+                                    <span class="investment-name">Fondo de Desarrollo</span>
+                                    <span class="investment-amount" id="development-fund-amount">0</span>
+                                </div>
+                                <button class="economic-btn" id="invest-development-fund">Invertir</button>
+                                <div class="economic-cost" id="development-fund-cost">Costo: $300</div>
+                                <div class="economic-benefit" id="development-fund-benefit"></div>
+                            </div>
+                            <div class="investment-item" data-investment="emergency-reserves">
+                                <div class="investment-header">
+                                    <span class="investment-name">Reservas de Emergencia</span>
+                                    <span class="investment-amount" id="emergency-reserves-amount">0</span>
+                                </div>
+                                <button class="economic-btn" id="invest-emergency-reserves">Crear</button>
+                                <div class="economic-cost" id="emergency-reserves-cost">Costo: $150</div>
+                                <div class="economic-benefit" id="emergency-reserves-benefit"></div>
+                            </div>
+                        </div>
+                        <div class="investment-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Interés Total:</span>
+                                <span class="summary-value" id="total-interest">$0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Estabilidad:</span>
+                                <span class="summary-value" id="investment-stability">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel de otros paises -->
+                <div class="other-countries-panel" id="other-countries-container">
+                    <h3>Intel de Otros Países</h3>
+                    <div id="other-countries-list" class="other-countries-list">
+                        <!-- La lista de países se generará aquí -->
                     </div>
                 </div>
             </div>
 
-            <!-- Panel de otros países -->
-            <div class="other-countries-panel">
-                <h3>Intel de Otros Países</h3>
-                <div id="other-countries-list">
+            <!-- Panel de Alertas -->
+            <div class="alerts-panel">
+                <h3>🚨 Alertas</h3>
+                <div class="alerts-header">
+                    <span class="alerts-count" id="alerts-count">0 alertas</span>
+                    <button class="clear-alerts-btn" id="clear-alerts-btn">Limpiar</button>
+                </div>
+                <div id="alerts-list" class="alerts-list">
                     <!-- Se llenará dinámicamente -->
                 </div>
             </div>
@@ -291,18 +498,42 @@
     <script src="js/data/events/DevelopmentEvents.js"></script>
     <script src="js/data/events/PopulationEvents.js"></script>
     <script src="js/data/events/MilitaryEvents.js"></script>
+    <script src="js/data/events/EconomicEvents.js"></script>
+    <script src="js/data/events/IndustryEvents.js"></script>
+    <script src="js/data/events/InfrastructureEvents.js"></script>
+    <script src="js/data/events/FinancialEvents.js"></script>
     <script src="js/data/EventData.js"></script>
     <script src="js/data/events/EventManager.js"></script>
     <script src="js/data/CountryGenerator.js"></script>
     <script src="js/data/PersonageGenerator.js"></script>
     
     <!-- Core -->
+    <script src="js/core/EconomicDataManager.js"></script>
+    <script src="js/core/IncomeCalculator.js"></script>
+    <script src="js/core/InvestmentManager.js"></script>
+    <script src="js/core/IndustryManager.js"></script>
+    <script src="js/core/InfrastructureManager.js"></script>
+    <script src="js/core/MilitaryBonusManager.js"></script>
+    <script src="js/core/BalanceManager.js"></script>
+    <script src="js/core/EconomicMinistry.js"></script>
+    <script src="js/core/AlertSystem.js"></script>
+    <script src="js/core/MilitaryManager.js"></script>
+    <script src="js/core/BattleManager.js"></script>
+    <script src="js/core/IntelManager.js"></script>
     <script src="js/core/CountryManager.js"></script>
     <script src="js/core/EventSystem.js"></script>
     <script src="js/core/AIController.js"></script>
     <script src="js/core/GameLoop.js"></script>
 
     <!-- UI -->
+    <script src="js/ui/modules/UIEventListeners.js"></script>
+    <script src="js/ui/modules/UIDisplayManager.js"></script>
+    <script src="js/ui/modules/UIModalManager.js"></script>
+    <script src="js/ui/modules/UIDevelopmentManager.js"></script>
+    <script src="js/ui/modules/UIWarMinistry.js"></script>
+    <script src="js/ui/modules/UIEconomicMinistry.js"></script>
+    <script src="js/ui/modules/UIInvestmentManager.js"></script>
+    <script src="js/ui/modules/UIAlertManager.js"></script>
     <script src="js/ui/UIManager.js"></script>
     <script src="js/ui/StatsDisplay.js"></script>
     <script src="js/ui/EventModal.js"></script>

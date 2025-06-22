@@ -3,8 +3,6 @@
 ## [Unreleased] - Próximas Características
 
 ### Características Planificadas
-- **Sistema de guerra**: Agrega los conflictos belicos y sus consecuencias / beneficios
-- **Sistema de dinero**: Agrega una variable de dinero
 - **Sistema de Gráficos**: Visualización del mundo con mapas interactivos
 - **Soporte Multiplayer**: Juego multijugador en tiempo real
 - **Tutorial**: Guía interactiva para nuevos jugadores
@@ -26,7 +24,119 @@
 - **Sistema de Infamia**: Reputación, fama: buffos y debuff 
 - **Sistema de Inteigencia**: Espionaje y contraespionaje.
 - **Sistema de Territorio**: Expandirse, fundar ciudades, enviar colonos
----
+- **Sistema de Periodico**: Como en los juegos de Paradox
+- **Sistema de Leyes**: Como los del victoria 3
+
+## [v0.5] - 2025-06-22
+
+Esta versión introduce una profunda revisión de la interfaz, economía y la guerra, sentando las bases para una jugabilidad más estratégica y compleja, tambien se modularizo y refactorizo `js/ui/UIManager.js`.
+
+### 🏛️ Ministerio de Economía: Industrias e Infraestructura
+Se ha implementado el núcleo del sistema económico, permitiendo a las naciones desarrollar sus capacidades productivas y de infraestructura.
+
+#### **Sistema Económico Profundo**
+- **Gestión de Tesoro**: Cada nación ahora gestiona su propio dinero, un recurso central para todas las acciones.
+- **Ingresos por Impuestos**: La población genera ingresos pasivos, creando un flujo constante de dinero.
+- **Costos de Mantenimiento**: Las tropas tienen un costo de mantenimiento que escala con su tamaño y experiencia.
+- **Inversión Militar Estratégica**: Aumentar y entrenar ejércitos ahora requiere una inversión significativa, con costos que crecen exponencialmente.
+- **Eventos Económicos**: Nuevos eventos que impactan la economía nacional de forma positiva o negativa.
+
+#### **Sistema de Infraestructura Nacional**
+- **5 Construcciones Clave**: Carreteras, Puertos, Universidades, Hospitales y Bancos, cada uno con bonificaciones únicas.
+- **Sinergias Avanzadas**: Se han implementado combinaciones estratégicas que potencian los efectos:
+    - **Transporte**: Carreteras + Puertos (+25% ingresos).
+    - **Educativa**: Universidades + Hospitales (+20% ingresos).
+    - **Financiera**: Bancos + otra infraestructura (+15% ingresos).
+    - **Completa**: Las 5 infraestructuras (+50% ingresos).
+- **Efectos Multiplicadores**: La infraestructura ahora mejora la **eficiencia** y **estabilidad** económica, con bonificaciones que se acumulan.
+- **Eventos de Infraestructura**: 12 nuevos eventos dinámicos que pueden construir o destruir infraestructura, añadiendo nuevos desafíos y oportunidades.
+
+#### **Sistema de Inversiones Financieras Avanzado**
+- **3 Tipos de Inversiones**: Bonos del Estado, Fondos de Desarrollo y Reservas de Emergencia, cada uno con características únicas.
+- **Retornos Dinámicos**: Los intereses de las inversiones se calculan en tiempo real y se actualizan semanalmente.
+- **Costos Crecientes**: Cada inversión adicional cuesta más, incentivando decisiones estratégicas a largo plazo.
+- **Eventos Financieros**: 12 eventos únicos que afectan directamente las inversiones:
+    - **6 Eventos Positivos**: Boom Económico, Rally del Mercado, Golpe de Suerte Inversor, Oportunidad Dorada, Estabilidad Económica, Impulso de Desarrollo.
+    - **6 Eventos Negativos**: Crisis Financiera, Caída del Mercado, Escándalo de Inversiones, Default de Bonos, Recesión Económica, Estancamiento del Desarrollo.
+- **Multiplicadores Dinámicos**: Los eventos financieros aplican multiplicadores temporales a los retornos de inversión (hasta +80% en bonos, +60% en fondos).
+- **Interfaz Visual Mejorada**: Indicadores en tiempo real de eventos activos, multiplicadores y duración restante.
+- **Gestión de Riesgo**: Las reservas de emergencia proporcionan protección contra crisis y estabilidad económica.
+
+#### **Sistema de Alertas Inteligente**
+- **Análisis Automático**: El sistema analiza continuamente la situación económica, militar y de recursos del país.
+- **6 Tipos de Alertas**: Crisis, Oportunidades, Advertencias, Información, Éxito y Amenazas Militares.
+- **Alertas de Crisis Económica**: Detecta problemas de liquidez, ingresos bajos, inestabilidad y baja eficiencia.
+- **Alertas de Oportunidades**: Identifica multiplicadores de inversión, capital disponible y sinergias disponibles.
+- **Alertas de Amenazas Militares**: Advierte sobre ejércitos débiles y falta de experiencia militar.
+- **Alertas de Eventos Financieros**: Informa sobre eventos activos y sus efectos en las inversiones.
+- **Alertas de Sinergias**: Sugiere combinaciones de infraestructura para maximizar beneficios.
+- **Alertas de Recursos**: Detecta escasez de puntos de desarrollo y población baja.
+- **Interfaz Visual Avanzada**: Alertas con colores diferenciados, animaciones y prioridades claras.
+- **Acciones Sugeridas**: Cada alerta incluye recomendaciones específicas para resolver problemas o aprovechar oportunidades.
+
+#### **Sistema de Sinergias Militares**
+- **Integración Completa**: Las decisiones económicas ahora afectan directamente las capacidades militares.
+- **Bonificaciones por Industrias**:
+  - **Industria Militar**: +5% tamaño del ejército, +10% experiencia, +2% ataque por nivel
+  - **Industria Tecnológica**: -3% mantenimiento, +1.5% defensa, +5% reclutamiento por nivel
+  - **Industria Básica**: -2% mantenimiento, +3% reclutamiento por nivel
+- **Bonificaciones por Infraestructura**:
+  - **Carreteras**: +5% ataque, +3% defensa (movilidad militar)
+  - **Puertos**: +3% tamaño del ejército, +4% reclutamiento (logística naval)
+  - **Universidades**: +15% experiencia, +2% ataque/defensa (estrategia militar)
+  - **Hospitales**: +4% defensa, -2% mantenimiento (reducción de bajas)
+  - **Bancos**: -5% mantenimiento, +6% reclutamiento (financiación militar)
+- **Bonificaciones por Inversiones**:
+  - **Bonos del Estado**: +1% defensa, -0.5% mantenimiento por bono
+  - **Fondos de Desarrollo**: +2% reclutamiento, +5% experiencia por fondo
+  - **Reservas de Emergencia**: +1.5% defensa, -1% mantenimiento por reserva
+- **Sinergias Especiales**:
+  - **Logística Avanzada**: Industria Militar + Carreteras (+3% ataque, +2% tamaño)
+  - **Investigación Militar**: Industria Tecnológica + Universidades (+10% experiencia, +2% defensa)
+  - **Suministros Navales**: Industria Básica + Puertos (-2% mantenimiento, +3% reclutamiento)
+  - **Sistema de Salud Militar**: Hospitales + Bancos (+3% defensa, -2% mantenimiento)
+  - **Poder Militar Total**: Todas las infraestructuras (+5% ataque/defensa, +3% tamaño, +10% experiencia, +5% reclutamiento, -3% mantenimiento)
+- **Interfaz Visual**: Panel dedicado que muestra bonificaciones activas y sinergias disponibles.
+- **Costos Dinámicos**: Los costos de mantenimiento y reclutamiento se ajustan automáticamente según las bonificaciones económicas.
+
+#### **Sistema de Balance Dinámico**
+- **Escalado de Costos**: Los costos aumentan gradualmente con el tiempo para mantener el desafío:
+  - **Industrias**: +2% por semana (máximo 3x el costo original)
+  - **Infraestructura**: +1.5% por semana (máximo 3x el costo original)
+  - **Inversiones**: +1% por semana (máximo 3x el costo original)
+- **Escalado de Beneficios**: Los beneficios se ajustan según las estadísticas del país:
+  - **Ingresos**: +5% por punto de economía (máximo 2.5x el beneficio original)
+  - **Eficiencia**: +3% por punto de ciencia (máximo 2.5x el beneficio original)
+  - **Estabilidad**: +2% por punto de social (máximo 2.5x el beneficio original)
+- **Ajuste Automático**: El sistema analiza el progreso promedio de todos los países y ajusta los multiplicadores:
+  - **Progreso Alto (>8)**: Costos más altos, beneficios moderados para mantener el desafío
+  - **Progreso Medio (5-8)**: Costos moderados, beneficios equilibrados
+  - **Progreso Bajo (<5)**: Costos bajos, beneficios altos para facilitar el progreso
+- **Límites de Seguridad**: Mínimos y máximos para evitar desequilibrios extremos
+- **Balance Inteligente**: Los costos de estadísticas no escalan, solo los costos monetarios
+
+### ⚔️ Sistema de Combate y Opciones Post-Batalla Mejoradas
+- **Fórmula de Poder Corregida**: El poder militar ahora se calcula correctamente basándose en el tamaño y la experiencia del ejército.
+- **Opciones Estratégicas Post-Victoria**:
+    - **Saquear**: Roba el 75% del dinero del enemigo.
+    - **Arrasar**: Destruye infraestructura enemiga para ganar puntos de desarrollo.
+    - **Conquistar**: Anexa la nación, absorbiendo su población y desarrollo.
+- **IA Táctica Mejorada**: La IA ahora elige estratégicamente entre Saquear, Arrasar o Conquistar.
+- **Interfaz de Batalla Clara**: El reporte de batalla ahora muestra la Fuerza de Combate y las opciones post-victoria son más claras.
+
+### ⚙️ Mejoras de Jugabilidad y Calidad de Vida
+- **Sistema de Tiempo Arreglado**: La velocidad del juego ahora es consistente y las semanas transcurren correctamente.
+- **Registros Detallados**: Resúmenes semanales e informes de combate detallados en la consola.
+- **UI Actualizada al Instante**: Los costos y requisitos en la interfaz se actualizan en tiempo real.
+
+### Archivos Modificados
+- **`js/core/EconomicMinistry.js`**: Implementación de industrias, inversiones, infraestructura y sinergias.
+- **`js/core/CountryManager.js`**: Integración de la economía, costos exponenciales y acciones post-batalla.
+- **`js/core/AIController.js`**: Lógica de IA mejorada para la gestión económica y decisiones post-batalla.
+- **`js/ui/UIManager.js`**: Rediseño del modal de batalla, actualización de la UI económica y corrección de errores.
+- **`js/data/events/`**: Creados `EconomicEvents.js`, `IndustryEvents.js` e `InfrastructureEvents.js` y actualizados `EventManager.js` y `EventTypes.js`.
+- **`index.html` y `styles/main.css`**: Actualización de la estructura y estilos de la UI.
+- **Otros**: `GameLoop.js`, `main.js`, `CountryGenerator.js`.
 
 ## [v0.4] - 2025-06-21
 

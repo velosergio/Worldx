@@ -11,6 +11,9 @@ class EventManager {
         this.developmentEvents = new DevelopmentEvents();
         this.populationEvents = new PopulationEvents();
         this.militaryEvents = new MilitaryEvents();
+        this.economicEvents = new EconomicEvents();
+        this.industryEvents = new IndustryEvents();
+        this.financialEvents = FinancialEvents;
     }
 
     /**
@@ -24,15 +27,19 @@ class EventManager {
 
         // Probabilidades base con más variedad
         const probabilities = [
-            { type: EventTypes.PERSONAGE, weight: 0.18 },
-            { type: EventTypes.CRISIS, weight: 0.16 },
-            { type: EventTypes.INSPIRATION, weight: 0.10 },
-            { type: EventTypes.MILESTONE, weight: 0.10 },
-            { type: EventTypes.DISCOVERY, weight: 0.07 },
-            { type: EventTypes.CULTURAL, weight: 0.06 },
-            { type: EventTypes.TECHNOLOGICAL, weight: 0.05 },
-            { type: EventTypes.POPULATION, weight: 0.15 },
-            { type: EventTypes.MILITARY, weight: 0.13 }
+            { type: EventTypes.PERSONAGE, weight: 0.15 },
+            { type: EventTypes.CRISIS, weight: 0.14 },
+            { type: EventTypes.INSPIRATION, weight: 0.08 },
+            { type: EventTypes.MILESTONE, weight: 0.08 },
+            { type: EventTypes.DISCOVERY, weight: 0.06 },
+            { type: EventTypes.CULTURAL, weight: 0.05 },
+            { type: EventTypes.TECHNOLOGICAL, weight: 0.04 },
+            { type: EventTypes.POPULATION, weight: 0.12 },
+            { type: EventTypes.MILITARY, weight: 0.11 },
+            { type: EventTypes.ECONOMIC, weight: 0.17 },
+            { type: EventTypes.INDUSTRY, weight: 0.10 },
+            { type: EventTypes.INFRASTRUCTURE, weight: 0.10 },
+            { type: EventTypes.FINANCIAL, weight: 0.12 }
         ];
 
         // Ajustar pesos basados en la situación del país
@@ -80,6 +87,22 @@ class EventManager {
             case EventTypes.MILITARY:
                 event = this.militaryEvents.generateMilitaryEvent(country, year);
                 break;
+
+            case EventTypes.ECONOMIC:
+                event = this.economicEvents.generateEconomicEvent(country);
+                break;
+                
+            case EventTypes.INDUSTRY:
+                event = this.industryEvents.generateRandomEvent(country);
+                break;
+
+            case EventTypes.INFRASTRUCTURE:
+                event = this.generateInfrastructureEvent(country);
+                break;
+
+            case EventTypes.FINANCIAL:
+                event = this.generateFinancialEvent(country);
+                break;
         }
         
         if (event) {
@@ -87,6 +110,90 @@ class EventManager {
         }
         
         return event;
+    }
+
+    /**
+     * Genera un evento de infraestructura usando el nuevo sistema
+     * @param {Object} country - País para el cual generar el evento
+     * @returns {Object|null} Evento de infraestructura o null
+     */
+    generateInfrastructureEvent(country) {
+        // Usar la función del nuevo sistema de eventos de infraestructura
+        const availableEvents = getAvailableInfrastructureEvents(country);
+        
+        if (availableEvents.length === 0) {
+            return null;
+        }
+        
+        // Seleccionar evento basado en rareza
+        const eventWeights = availableEvents.map(event => {
+            switch (event.rarity) {
+                case 'COMMON': return 10;
+                case 'UNCOMMON': return 5;
+                case 'RARE': return 2;
+                default: return 1;
+            }
+        });
+        
+        const selectedEvent = RandomUtils.weightedChoice(
+            availableEvents.map((event, index) => ({
+                item: event,
+                weight: eventWeights[index]
+            }))
+        );
+        
+        return selectedEvent ? selectedEvent.item : null;
+    }
+
+    /**
+     * Genera un evento financiero usando el nuevo sistema
+     * @param {Object} country - País para el cual generar el evento
+     * @returns {Object|null} Evento financiero o null
+     */
+    generateFinancialEvent(country) {
+        // Obtener eventos disponibles basados en las condiciones del país
+        const availableEvents = this.financialEvents.getAllEvents().filter(event => 
+            this.financialEvents.canHaveEvent(country, event)
+        );
+        
+        if (availableEvents.length === 0) {
+            return null;
+        }
+        
+        // Separar eventos positivos y negativos
+        const positiveEvents = availableEvents.filter(event => 
+            this.financialEvents.positive.includes(event)
+        );
+        const negativeEvents = availableEvents.filter(event => 
+            this.financialEvents.negative.includes(event)
+        );
+        
+        // 60% probabilidad de evento positivo, 40% de evento negativo
+        const isPositive = Math.random() < 0.6;
+        const eventPool = isPositive ? positiveEvents : negativeEvents;
+        
+        if (eventPool.length === 0) {
+            return null;
+        }
+        
+        // Seleccionar evento basado en rareza
+        const eventWeights = eventPool.map(event => {
+            switch (event.rarity) {
+                case 'COMMON': return 10;
+                case 'UNCOMMON': return 5;
+                case 'RARE': return 2;
+                default: return 1;
+            }
+        });
+        
+        const selectedEvent = RandomUtils.weightedChoice(
+            eventPool.map((event, index) => ({
+                item: event,
+                weight: eventWeights[index]
+            }))
+        );
+        
+        return selectedEvent ? selectedEvent.item : null;
     }
 
     /**
@@ -161,52 +268,51 @@ class EventManager {
      * @param {Object} country - País afectado
      */
     applyEventEffects(event, country) {
-        // Aplicar efectos de estadísticas
+        // Aplicar efectos permanentes (si no son temporales)
         if (event.effects) {
-            if (typeof event.effects === 'object') {
-                Object.keys(event.effects).forEach(stat => {
-                    if (country.stats.hasOwnProperty(stat)) {
-                        let effect = event.effects[stat];
-                        
-                        // Aplicar sinergias
-                        effect = this.calculateSynergyBonus(effect, stat, country.stats, event.type);
-                        
-                        // Aplicar el efecto final
-                        country.stats[stat] = Math.max(0, country.stats[stat] + effect);
-                    }
-                });
-            }
-        }
-
-        // Aplicar efectos de población
-        if (event.populationEffects) {
-            if (event.populationEffects.population) {
-                country.population = Math.max(1, country.population + event.populationEffects.population);
-            }
-            
-            if (event.populationEffects.birthRate) {
-                country.birthRate = Math.max(0.1, country.birthRate * event.populationEffects.birthRate);
-            }
-        }
-
-        // Aplicar efectos militares
-        if (event.militaryEffects) {
-            if (event.militaryEffects.army !== undefined) {
-                if (event.militaryEffects.army > 0) {
-                    // Aumentar ejército
-                    const increaseAmount = Math.floor(country.population * event.militaryEffects.army);
-                    const maxArmy = Math.floor(country.population * 0.4);
-                    country.army = Math.min(maxArmy, country.army + increaseAmount);
-                } else {
-                    // Reducir ejército
-                    const decreaseAmount = Math.floor(country.army * Math.abs(event.militaryEffects.army));
-                    country.army = Math.max(0, country.army - decreaseAmount);
+            for (const stat in event.effects) {
+                if (typeof event.effects[stat] !== 'object' && country.stats.hasOwnProperty(stat)) {
+                    const baseEffect = event.effects[stat];
+                    // Aplicar sinergias
+                    const synergyBonus = this.calculateSynergyBonus(baseEffect, stat, country.stats, event.type);
+                    const finalEffect = baseEffect + synergyBonus;
+                    
+                    country.stats[stat] = Math.max(0, country.stats[stat] + finalEffect);
                 }
             }
-            
-            if (event.militaryEffects.armyExperience !== undefined) {
-                country.armyExperience = Math.max(1, Math.min(10, country.armyExperience + event.militaryEffects.armyExperience));
+        }
+        
+        // Aplicar efectos temporales
+        if (event.effects && event.effects.temporary) {
+            for (const stat in event.effects.temporary) {
+                if (country.stats.hasOwnProperty(stat)) {
+                    let effect = event.effects.temporary[stat];
+                    
+                    // Aplicar sinergias
+                    const synergyBonus = this.calculateSynergyBonus(effect, stat, country.stats, event.type);
+                    effect += synergyBonus;
+
+                    if (!country.temporaryEffects) {
+                        country.temporaryEffects = {};
+                    }
+                    if (!country.temporaryEffects[stat]) {
+                        country.temporaryEffects[stat] = 0;
+                    }
+                    country.temporaryEffects[stat] += effect;
+                    // Aplicar efecto inmediato, asegurando que no sea negativo
+                    country.stats[stat] = Math.max(0, country.stats[stat] + effect);
+                }
             }
+        }
+
+        // Ejecutar función de efecto personalizado si existe (para lógica compleja)
+        if (typeof event.applyEffect === 'function') {
+            event.applyEffect(country, window.worldxGame.countryManager);
+        }
+
+        // Aplicar efectos económicos (del sistema antiguo, para compatibilidad)
+        if (event.economicEffects) {
+            this.applyEconomicEffects(event, country);
         }
     }
 
@@ -249,6 +355,11 @@ class EventManager {
      * @param {Object} country - País afectado
      */
     revertEventEffects(event, country) {
+        // Revertir efectos financieros (si es un evento financiero)
+        if (event.type === EventTypes.FINANCIAL) {
+            this.financialEvents.revertEventEffects(country, event);
+        }
+
         // Revertir efectos de estadísticas
         if (event.effects) {
             if (typeof event.effects === 'object') {
@@ -273,6 +384,25 @@ class EventManager {
         if (event.militaryEffects && event.duration > 0) {
             if (event.militaryEffects.armyExperience !== undefined) {
                 country.armyExperience = Math.max(1, Math.min(10, country.armyExperience - event.militaryEffects.armyExperience));
+            }
+        }
+
+        if (event.effects && event.effects.temporary) {
+            for (const stat in event.effects.temporary) {
+                if (country.stats.hasOwnProperty(stat)) {
+                    // Revertir el efecto aplicado
+                    let effect = event.effects.temporary[stat];
+                    const synergyBonus = this.calculateSynergyBonus(effect, stat, country.stats, event.type);
+                    effect += synergyBonus;
+                    
+                    // Revertir y asegurar que no sea negativo
+                    country.stats[stat] = Math.max(0, country.stats[stat] - effect);
+
+                    // Limpiar el efecto temporal del registro del país
+                    if (country.temporaryEffects && country.temporaryEffects[stat]) {
+                        country.temporaryEffects[stat] -= effect;
+                    }
+                }
             }
         }
     }

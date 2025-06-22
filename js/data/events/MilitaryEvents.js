@@ -9,7 +9,9 @@ class MilitaryEvents {
                 title: 'Victoria Épica',
                 description: 'El ejército ha logrado una victoria legendaria que ha elevado la moral y la experiencia de todas las tropas.',
                 effects: { military: 2 },
-                militaryEffects: { armyExperience: 1 },
+                applyEffect: (country, countryManager) => {
+                    countryManager.trainArmy(country.id); // Reutiliza la lógica de entrenamiento
+                },
                 duration: 0,
                 type: 'military_positive',
                 rarity: 'rare',
@@ -19,7 +21,13 @@ class MilitaryEvents {
                 title: 'Reclutamiento Masivo',
                 description: 'Un programa de reclutamiento exitoso ha atraído a miles de voluntarios al ejército.',
                 effects: { military: 1 },
-                militaryEffects: { army: 0.15 }, // 15% de la población
+                applyEffect: (country, countryManager) => {
+                    const increaseAmount = Math.floor(country.population * 0.15);
+                    country.army += increaseAmount;
+                    // Asegurarse de no exceder el límite
+                    const maxArmy = Math.floor(country.population * 0.4);
+                    if (country.army > maxArmy) country.army = maxArmy;
+                },
                 duration: 0,
                 type: 'military_positive',
                 rarity: 'common',
@@ -29,7 +37,9 @@ class MilitaryEvents {
                 title: 'Entrenamiento Avanzado',
                 description: 'Un programa de entrenamiento especializado ha mejorado significativamente las habilidades del ejército.',
                 effects: { military: 1 },
-                militaryEffects: { armyExperience: 1 },
+                applyEffect: (country, countryManager) => {
+                    countryManager.trainArmy(country.id);
+                },
                 duration: 0,
                 type: 'military_positive',
                 rarity: 'uncommon',
@@ -39,7 +49,9 @@ class MilitaryEvents {
                 title: 'Alianza Militar',
                 description: 'Una alianza estratégica con otra nación ha fortalecido las capacidades militares.',
                 effects: { military: 2, economy: 1 },
-                militaryEffects: { armyExperience: 1 },
+                applyEffect: (country, countryManager) => {
+                    countryManager.trainArmy(country.id);
+                },
                 duration: 0,
                 type: 'military_positive',
                 rarity: 'rare',
@@ -49,7 +61,9 @@ class MilitaryEvents {
                 title: 'Innovación Tecnológica',
                 description: 'Nuevas tecnologías militares han sido desarrolladas, dando ventaja estratégica al ejército.',
                 effects: { military: 2, science: 1 },
-                militaryEffects: { armyExperience: 1 },
+                applyEffect: (country, countryManager) => {
+                    countryManager.trainArmy(country.id);
+                },
                 duration: 0,
                 type: 'military_positive',
                 rarity: 'uncommon',
@@ -59,7 +73,10 @@ class MilitaryEvents {
                 title: 'Héroe Nacional',
                 description: 'Un comandante legendario ha surgido, inspirando a todo el ejército con su liderazgo.',
                 effects: { military: 1, social: 1 },
-                militaryEffects: { armyExperience: 2 },
+                applyEffect: (country, countryManager) => {
+                    countryManager.trainArmy(country.id);
+                    countryManager.trainArmy(country.id); // Doble entrenamiento
+                },
                 duration: 0,
                 type: 'military_positive',
                 rarity: 'rare',
@@ -71,7 +88,9 @@ class MilitaryEvents {
                 title: 'Derrota Desastrosa',
                 description: 'Una derrota militar humillante ha minado la moral y la confianza del ejército.',
                 effects: { military: -2, social: -1 },
-                militaryEffects: { armyExperience: -1 },
+                applyEffect: (country) => {
+                    if (country.armyExperience > 1) country.armyExperience -= 1;
+                },
                 duration: 0,
                 type: 'military_negative',
                 rarity: 'rare',
@@ -81,7 +100,9 @@ class MilitaryEvents {
                 title: 'Deserción Masiva',
                 description: 'Las tropas han comenzado a desertar en masa, debilitando las fuerzas armadas.',
                 effects: { military: -1 },
-                militaryEffects: { army: -0.2 }, // 20% de reducción
+                applyEffect: (country) => {
+                    country.army = Math.floor(country.army * 0.8); // 20% de reducción
+                },
                 duration: 0,
                 type: 'military_negative',
                 rarity: 'uncommon',
@@ -91,7 +112,9 @@ class MilitaryEvents {
                 title: 'Escasez de Equipamiento',
                 description: 'La falta de equipamiento moderno ha reducido la efectividad del ejército.',
                 effects: { military: -1 },
-                militaryEffects: { armyExperience: -1 },
+                applyEffect: (country) => {
+                    if (country.armyExperience > 1) country.armyExperience -= 1;
+                },
                 duration: 0,
                 type: 'military_negative',
                 rarity: 'common',
@@ -101,7 +124,9 @@ class MilitaryEvents {
                 title: 'Conflicto Interno',
                 description: 'Disputas internas en el alto mando han afectado la coordinación militar.',
                 effects: { military: -1, social: -1 },
-                militaryEffects: { armyExperience: -1 },
+                applyEffect: (country) => {
+                    if (country.armyExperience > 1) country.armyExperience -= 1;
+                },
                 duration: 0,
                 type: 'military_negative',
                 rarity: 'uncommon',
@@ -111,7 +136,9 @@ class MilitaryEvents {
                 title: 'Enfermedad en el Ejército',
                 description: 'Una enfermedad se ha propagado entre las tropas, debilitando su capacidad de combate.',
                 effects: { military: -2 },
-                militaryEffects: { army: -0.1 }, // 10% de reducción
+                applyEffect: (country) => {
+                    country.army = Math.floor(country.army * 0.9); // 10% de reducción
+                },
                 duration: 0,
                 type: 'military_negative',
                 rarity: 'common',
@@ -121,7 +148,9 @@ class MilitaryEvents {
                 title: 'Sabotaje Enemigo',
                 description: 'Agentes enemigos han saboteado instalaciones militares críticas.',
                 effects: { military: -2, economy: -1 },
-                militaryEffects: { armyExperience: -1 },
+                applyEffect: (country) => {
+                    if (country.armyExperience > 1) country.armyExperience -= 1;
+                },
                 duration: 0,
                 type: 'military_negative',
                 rarity: 'rare',
@@ -169,7 +198,7 @@ class MilitaryEvents {
             title: militaryData.title,
             description: militaryData.description,
             effects: militaryData.effects,
-            militaryEffects: militaryData.militaryEffects,
+            applyEffect: militaryData.applyEffect,
             affectedCountries: [country.id],
             year: year,
             duration: militaryData.duration,
@@ -198,7 +227,7 @@ class MilitaryEvents {
             title: militaryData.title,
             description: militaryData.description,
             effects: militaryData.effects,
-            militaryEffects: militaryData.militaryEffects,
+            applyEffect: militaryData.applyEffect,
             affectedCountries: [country.id],
             year: 0,
             duration: militaryData.duration,

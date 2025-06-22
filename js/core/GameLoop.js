@@ -6,8 +6,9 @@ class GameLoop {
         this.game = game;
         this.isRunning = false;
         this.lastTime = 0;
-        this.accumulator = 0;
-        this.timestep = 1000; // 1 segundo por año
+        this.gameTickAccumulator = 0; // Acumulador para la lógica del juego (días, semanas)
+        this.economyAccumulator = 0;  // Acumulador separado para la economía
+        this.timestep = 1000; // 1 segundo por día (se ajustará por la velocidad)
         this.frameId = null;
     }
 
@@ -41,12 +42,20 @@ class GameLoop {
         const deltaTime = currentTime - this.lastTime;
         this.lastTime = currentTime;
 
-        this.accumulator += deltaTime;
+        // Incrementar ambos acumuladores
+        this.gameTickAccumulator += deltaTime;
+        this.economyAccumulator += deltaTime;
 
-        // Actualizar juego en intervalos fijos
-        while (this.accumulator >= this.timestep) {
+        // Actualizar economía cada segundo (1000ms), sin afectar el tick del juego
+        if (this.economyAccumulator >= 1000) {
+            this.updateEconomy();
+            this.economyAccumulator -= 1000;
+        }
+
+        // Actualizar juego en intervalos fijos basado en su propio acumulador
+        while (this.gameTickAccumulator >= this.timestep) {
             this.update();
-            this.accumulator -= this.timestep;
+            this.gameTickAccumulator -= this.timestep;
         }
 
         // Renderizar en cada frame
@@ -56,10 +65,23 @@ class GameLoop {
     }
 
     /**
+     * Actualiza la economía
+     */
+    updateEconomy() {
+        if (this.game.gameState === 'playing') {
+            // El cálculo de ingresos/gastos ya se hace en el loop principal.
+            // Esta función solo se asegura de que la UI se actualice.
+            this.game.uiManager.updateEconomyDisplay();
+        }
+    }
+
+    /**
      * Actualiza la lógica del juego
      */
     update() {
         if (this.game.gameState === 'playing' && this.game.gameSpeed > 0) {
+            // Actualizar economía y luego el día
+            this.game.countryManager.updateEconomy();
             this.game.updateDay();
         }
     }

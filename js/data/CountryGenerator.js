@@ -96,10 +96,19 @@ class CountryGenerator {
             population: 500, // Población inicial fija
             birthRate: 1.0, // Multiplicador de natalidad (1.0 = normal)
 
+            // Sistema de economía
+            money: 1000, // Dinero inicial
+            income: 25, // Ingreso por segundo (basado en población)
+            taxRate: 0.05, // Tasa de impuestos (5% de la población)
+            armyMaintenanceCost: 0, // Costo de mantenimiento del ejército
+            armyTrainingCost: 0, // Costo de entrenamiento del ejército
+
             // Sistema militar
             army: 0, // Número de tropas (máximo 40% de población)
             armyExperience: 1, // Nivel de experiencia del ejército (1-10)
-            armyUpgrades: 0, // Número de mejoras de ejército realizadas
+            maxArmySize: 0, // Se calcula dinámicamente
+            increaseArmyCount: 0, // Para escalar costos
+            trainArmyCount: 0, // Para escalar costos
 
             // Estado del juego
             isActive: true, // El país está activo en el juego

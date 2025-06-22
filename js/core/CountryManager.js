@@ -1,5 +1,6 @@
 /**
  * Gestor de países para Worldx
+ * REFACTORIZADO: Ahora usa módulos especializados para mejor organización
  */
 class CountryManager {
     constructor() {
@@ -7,6 +8,12 @@ class CountryManager {
         this.playerCountry = null;
         this.aiCountries = [];
         this.countryGenerator = new CountryGenerator();
+        this.economicMinistry = new EconomicMinistry();
+        
+        // Inicializar módulos especializados
+        this.militaryManager = new MilitaryManager(this);
+        this.battleManager = new BattleManager(this);
+        this.intelManager = new IntelManager(this);
     }
 
     /**
@@ -17,12 +24,14 @@ class CountryManager {
         
         // Generar país del jugador
         this.playerCountry = this.countryGenerator.generateCountry(true, playerCountryName);
+        this.economicMinistry.initializeCountryEconomy(this.playerCountry);
         this.countries.push(this.playerCountry);
         
         // Generar países de IA
         this.aiCountries = [];
         for (let i = 0; i < 2; i++) {
             const aiCountry = this.countryGenerator.generateCountry(false);
+            this.economicMinistry.initializeCountryEconomy(aiCountry);
             this.countries.push(aiCountry);
             this.aiCountries.push(aiCountry);
         }
@@ -108,6 +117,78 @@ class CountryManager {
     }
 
     /**
+     * Actualiza la economía de todos los países (usado por el GameLoop).
+     */
+    updateEconomy() {
+        this.countries.forEach(country => {
+            if (country.isActive) {
+                this.updateCountryEconomy(country);
+            }
+        });
+    }
+
+    /**
+     * Calcula y actualiza las estadísticas económicas base de un país.
+     * No modifica el dinero, solo calcula los ingresos y costos.
+     */
+    calculateEconomyStats(country) {
+        if (!country) return;
+
+        // Calcular ingresos por impuestos (basado en población)
+        const taxIncome = Math.floor(country.population * country.taxRate);
+        country.income = taxIncome;
+
+        // Aplicar bonificaciones militares del Ministerio de Economía
+        this.economicMinistry.applyMilitaryBonuses(country);
+
+        // Calcular costos de mantenimiento del ejército con bonificaciones
+        const baseMaintenance = 0.5; // Costo base por soldado
+        const experienceMultiplier = 1 + (country.armyExperience - 1) * 0.2; // 20% más caro por nivel de experiencia
+        const armyMaintenance = Math.floor(country.army * baseMaintenance * experienceMultiplier);
+        country.armyMaintenanceCost = armyMaintenance;
+
+        // Aplicar reducción de mantenimiento por bonificaciones económicas
+        const adjustedMaintenance = this.economicMinistry.calculateAdjustedMilitaryMaintenance(country);
+        country.armyMaintenanceCost = adjustedMaintenance;
+
+        // Este costo es de acción, no recurrente. Se resetea para evitar confusiones.
+        country.armyTrainingCost = 0;
+    }
+
+    /**
+     * Actualiza la economía de un país específico, aplicando ingresos y gastos.
+     */
+    updateCountryEconomy(country) {
+        // Primero, nos aseguramos de que los stats base (ingresos, costos) estén actualizados
+        this.calculateEconomyStats(country);
+
+        // Aplicar ingresos y gastos netos (solo si el país está activo)
+        if (country.isActive) {
+            // Calcular ingresos totales incluyendo bonificaciones del Ministerio de Economía
+            const totalIncome = this.economicMinistry.calculateTotalIncome(country);
+            const netIncome = totalIncome - country.armyMaintenanceCost;
+            
+            country.money += netIncome;
+
+            // Asegurar que el dinero no sea negativo
+            if (country.money < 0) {
+                country.money = 0;
+            }
+            
+            // Actualizar indicadores económicos
+            this.economicMinistry.updateEconomicIndicators(country);
+            
+            // Procesar intereses de inversiones
+            this.economicMinistry.processInvestmentInterest(country);
+            
+            // Procesar eventos financieros activos
+            if (window.FinancialEvents && country.economicData) {
+                window.FinancialEvents.processTimePassage(country);
+            }
+        }
+    }
+
+    /**
      * Verifica si un país ha ganado
      */
     checkVictory(country) {
@@ -125,70 +206,6 @@ class CountryManager {
             }
         }
         return null;
-    }
-
-    /**
-     * Obtiene información limitada de otros países para el panel de Intel.
-     */
-    getOtherCountriesIntel(playerCountryId) {
-        return this.countries
-            .filter(country => country.id !== playerCountryId && country.isActive)
-            .map(country => this.generateIntel(country));
-    }
-
-    /**
-     * Obtiene los países enemigos completos que pueden ser atacados.
-     */
-    getAttackableEnemies(playerCountryId) {
-        return this.countries.filter(country => country.id !== playerCountryId && country.isActive);
-    }
-
-    /**
-     * Genera información de intel para un país
-     */
-    generateIntel(country) {
-        const stats = country.stats;
-        const highestStat = Object.keys(stats).reduce((a, b) => stats[a] > stats[b] ? a : b);
-        const lowestStat = Object.keys(stats).reduce((a, b) => stats[a] < stats[b] ? a : b);
-
-        const rumors = [
-            `${country.name} parece estar enfocado en el desarrollo ${this.getStatDisplayName(highestStat)}.`,
-            `Se rumorea que ${country.name} ha descuidado su ${this.getStatDisplayName(lowestStat)}.`,
-            `${country.name} mantiene un perfil bajo, pero se dice que está prosperando.`,
-            `Los espías reportan que ${country.name} está invirtiendo fuertemente en ${this.getStatDisplayName(highestStat)}.`,
-            `${country.name} parece estar en una posición ${this.getOverallStrength(stats) > 5 ? 'fuerte' : 'débil'}.`
-        ];
-
-        return {
-            id: country.id,
-            name: country.name,
-            rumor: RandomUtils.randomChoice(rumors),
-            strength: this.getOverallStrength(stats),
-            highestStat: highestStat,
-            lowestStat: lowestStat
-        };
-    }
-
-    /**
-     * Obtiene la fuerza general de un país
-     */
-    getOverallStrength(stats) {
-        return Object.values(stats).reduce((sum, stat) => sum + stat, 0);
-    }
-
-    /**
-     * Obtiene el nombre de visualización de una estadística
-     */
-    getStatDisplayName(stat) {
-        const names = {
-            'military': 'militar',
-            'social': 'social',
-            'culture': 'cultural',
-            'science': 'científico',
-            'economy': 'económico'
-        };
-        
-        return names[stat] || stat;
     }
 
     /**
@@ -212,273 +229,407 @@ class CountryManager {
         this.aiCountries = gameState.aiCountries || [];
     }
 
-    // --- Sistema del Ministerio de Guerra ---
+    // ============================================================================
+    // MÉTODOS DELEGADOS A MÓDULOS ESPECIALIZADOS
+    // ============================================================================
+
+    // --- Métodos de Intel (delegados a IntelManager) ---
 
     /**
-     * Obtiene el poder militar de un país
+     * Obtiene información limitada de otros países para el panel de Intel.
+     */
+    getOtherCountriesIntel(playerCountryId) {
+        return this.intelManager.getOtherCountriesIntel(playerCountryId);
+    }
+
+    /**
+     * Obtiene los países enemigos completos que pueden ser atacados.
+     */
+    getAttackableEnemies(playerCountryId) {
+        return this.intelManager.getAttackableEnemies(playerCountryId);
+    }
+
+    /**
+     * Genera información de intel para un país
+     */
+    generateIntel(country) {
+        return this.intelManager.generateIntel(country);
+    }
+
+    /**
+     * Obtiene la fuerza general de un país
+     */
+    getOverallStrength(stats) {
+        return this.intelManager.getOverallStrength(stats);
+    }
+
+    /**
+     * Obtiene el nombre de visualización de una estadística
+     */
+    getStatDisplayName(stat) {
+        return this.intelManager.getStatDisplayName(stat);
+    }
+
+    // --- Métodos Militares (delegados a MilitaryManager) ---
+
+    /**
+     * Obtiene el poder militar de un país con bonificaciones económicas
      */
     getMilitaryPower(country) {
-        if (!country) return 0;
-        
-        // Poder base = estadística militar * multiplicador de experiencia
-        const basePower = country.stats.military * country.armyExperience;
-        
-        // Bonus por tamaño del ejército (hasta 50% del poder base)
-        const armyBonus = (country.army / country.population) * 0.5 * basePower;
-        
-        return Math.floor(basePower + armyBonus);
+        return this.militaryManager.getMilitaryPower(country);
     }
 
     /**
      * Obtiene el poder total de un país
      */
     getTotalPower(country) {
-        if (!country) return 0;
-        
-        const stats = country.stats;
-        const militaryPower = this.getMilitaryPower(country);
-        
-        // Poder total = suma de todas las estadísticas + poder militar
-        return Object.values(stats).reduce((sum, stat) => sum + stat, 0) + militaryPower;
+        return this.militaryManager.getTotalPower(country);
     }
 
     /**
-     * Verifica si se puede aumentar el ejército
+     * Obtiene el costo para aumentar el ejército en formato de objeto
      */
-    canIncreaseArmy(country) {
-        if (!country) return false;
-        
-        const maxArmy = Math.floor(country.population * 0.4); // Máximo 40% de población
-        const currentArmy = country.army;
-        const increaseAmount = Math.floor(country.population * 0.1); // 10% de población
-        
-        return (currentArmy + increaseAmount) <= maxArmy;
+    getArmyIncreaseCostObject(country) {
+        return this.militaryManager.getArmyIncreaseCostObject(country);
+    }
+
+    /**
+     * Obtiene el costo para entrenar el ejército en formato de objeto
+     */
+    getArmyTrainingCostObject(country) {
+        return this.militaryManager.getArmyTrainingCostObject(country);
     }
 
     /**
      * Obtiene el costo para aumentar el ejército
      */
     getArmyIncreaseCost(country) {
-        if (!country) return { social: 0, economy: 0 };
-        
-        const baseCost = 1;
-        const upgradeMultiplier = country.armyUpgrades + 1;
-        
-        return {
-            social: baseCost * upgradeMultiplier,
-            economy: baseCost * upgradeMultiplier
-        };
+        return this.militaryManager.getArmyIncreaseCost(country);
+    }
+
+    /**
+     * Verifica si se puede aumentar el ejército
+     */
+    canIncreaseArmy(country) {
+        return this.militaryManager.canIncreaseArmy(country);
     }
 
     /**
      * Aumenta el ejército de un país
      */
     increaseArmy(countryId) {
-        const country = this.getCountryById(countryId);
-        if (!country || !this.canIncreaseArmy(country)) return false;
-        
-        const cost = this.getArmyIncreaseCost(country);
-        
-        // Verificar que tenga suficientes puntos
-        if (country.stats.social < cost.social || country.stats.economy < cost.economy) {
-            return false;
-        }
-        
-        // Aplicar costos
-        country.stats.social -= cost.social;
-        country.stats.economy -= cost.economy;
-        
-        // Aumentar ejército
-        const increaseAmount = Math.floor(country.population * 0.1);
-        country.army += increaseAmount;
-        country.armyUpgrades++;
-        
-        return true;
+        return this.militaryManager.increaseArmy(countryId);
+    }
+
+    /**
+     * Obtiene el costo para entrenar el ejército
+     */
+    getArmyTrainingCost(country) {
+        return this.militaryManager.getArmyTrainingCost(country);
     }
 
     /**
      * Verifica si se puede entrenar el ejército
      */
     canTrainArmy(country) {
-        if (!country) return false;
-        
-        const cost = 10; // Costo fijo de 10 puntos de poder militar
-        return country.stats.military >= cost && country.armyExperience < 10;
+        return this.militaryManager.canTrainArmy(country);
     }
 
     /**
      * Entrena el ejército de un país
      */
     trainArmy(countryId) {
-        const country = this.getCountryById(countryId);
-        if (!country || !this.canTrainArmy(country)) return false;
-        
-        const cost = 10;
-        
-        // Aplicar costo
-        country.stats.military -= cost;
-        
-        // Aumentar experiencia
-        country.armyExperience = Math.min(10, country.armyExperience + 1);
-        
-        return true;
+        return this.militaryManager.trainArmy(countryId);
     }
 
     /**
      * Obtiene información del ejército para la UI
      */
     getArmyInfo(country) {
-        if (!country) return null;
-        
-        const maxArmy = Math.floor(country.population * 0.4);
-        const militaryPower = this.getMilitaryPower(country);
-        const totalPower = this.getTotalPower(country);
-        const canIncrease = this.canIncreaseArmy(country);
-        const canTrain = this.canTrainArmy(country);
-        const increaseCost = this.getArmyIncreaseCost(country);
-        
-        return {
-            current: country.army,
-            max: maxArmy,
-            percentage: Math.round((country.army / maxArmy) * 100),
-            experience: country.armyExperience,
-            militaryPower: militaryPower,
-            totalPower: totalPower,
-            canIncrease: canIncrease,
-            canTrain: canTrain,
-            increaseCost: increaseCost,
-            trainCost: 10
-        };
+        return this.militaryManager.getArmyInfo(country);
     }
 
-    // --- Sistema de Batalla ---
+    // --- Métodos de Batalla (delegados a BattleManager) ---
 
     /**
      * Simula una batalla entre dos países.
-     * @param {string} attackerId - ID del país atacante.
-     * @param {string} defenderId - ID del país defensor.
-     * @returns {Object} - Objeto con los resultados de la batalla.
      */
     simulateBattle(attackerId, defenderId) {
-        const attacker = this.getCountryById(attackerId);
-        const defender = this.getCountryById(defenderId);
-
-        if (!attacker || !defender) {
-            return { result: 'error', message: 'País no encontrado.' };
-        }
-
-        // 1. Calcular Fuerza de Combate (Poder Militar + Factor Aleatorio)
-        const attackerPower = this.getMilitaryPower(attacker);
-        const defenderPower = this.getMilitaryPower(defender);
-
-        const attackerCombatStrength = attackerPower * RandomUtils.random(0.8, 1.2); // +/- 20% de suerte
-        const defenderCombatStrength = defenderPower * RandomUtils.random(0.8, 1.2);
-
-        // 2. Determinar Resultado
-        let result;
-        let powerRatio = attackerCombatStrength / (defenderCombatStrength + 1); // Evitar división por cero
-
-        if (powerRatio > 1.2) result = 'Victoria';
-        else if (powerRatio < 0.8) result = 'Derrota';
-        else result = 'Empate';
-
-        // 3. Calcular Bajas
-        let attackerCasualtyRate, defenderCasualtyRate;
-
-        switch (result) {
-            case 'Victoria':
-                attackerCasualtyRate = RandomUtils.random(0.1, 0.25); // 10-25% de bajas para el ganador
-                defenderCasualtyRate = RandomUtils.random(0.4, 0.7);  // 40-70% de bajas para el perdedor
-                break;
-            case 'Derrota':
-                attackerCasualtyRate = RandomUtils.random(0.4, 0.7);
-                defenderCasualtyRate = RandomUtils.random(0.1, 0.25);
-                break;
-            case 'Empate':
-            default:
-                attackerCasualtyRate = RandomUtils.random(0.25, 0.4); // Bajas altas para ambos
-                defenderCasualtyRate = RandomUtils.random(0.25, 0.4);
-                break;
-        }
-
-        const attackerCasualties = Math.min(attacker.army, Math.floor(attacker.army * attackerCasualtyRate));
-        const defenderCasualties = Math.min(defender.army, Math.floor(defender.army * defenderCasualtyRate));
-
-        // 4. Aplicar Bajas (al ejército y a la población)
-        attacker.army -= attackerCasualties;
-        attacker.population -= attackerCasualties;
-
-        defender.army -= defenderCasualties;
-        defender.population -= defenderCasualties;
-
-        // Asegurarse que la población no sea negativa
-        if (attacker.population <= 0) {
-            attacker.population = 0;
-            // Lógica de fin de juego para el jugador se manejará en WorldxGame
-        }
-        if (defender.population <= 0) {
-            defender.population = 0;
-        }
-
-        // 5. Devolver Reporte
-        return {
-            result,
-            attacker: {
-                id: attackerId,
-                name: attacker.name,
-                casualties: attackerCasualties,
-            },
-            defender: {
-                id: defenderId,
-                name: defender.name,
-                casualties: defenderCasualties,
-            },
-        };
+        return this.battleManager.simulateBattle(attackerId, defenderId);
     }
 
     /**
      * El atacante conquista el territorio del defensor.
-     * @param {string} attackerId 
-     * @param {string} defenderId 
      */
     conquerCountry(attackerId, defenderId) {
-        const attacker = this.getCountryById(attackerId);
-        const defender = this.getCountryById(defenderId);
-
-        if (!attacker || !defender) return;
-
-        // 1. Transferir toda la población restante
-        attacker.population += defender.population;
-        defender.population = 0;
-
-        // 2. Transferir 10% de cada estadística de desarrollo
-        for (const stat in defender.stats) {
-            const transferAmount = Math.floor(defender.stats[stat] * 0.10);
-            attacker.stats[stat] += transferAmount;
-            defender.stats[stat] -= transferAmount;
-        }
-
-        // 3. Desactivar al defensor
-        defender.isActive = false;
-        this.aiCountries = this.aiCountries.filter(c => c.id !== defenderId);
+        return this.battleManager.conquerCountry(attackerId, defenderId);
     }
 
     /**
      * El atacante arrasa el territorio del defensor para obtener recursos.
-     * @param {string} attackerId 
-     * @param {string} defenderId 
      */
     razeCountry(attackerId, defenderId) {
-        const attacker = this.getCountryById(attackerId);
-        const defender = this.getCountryById(defenderId);
+        return this.battleManager.razeCountry(attackerId, defenderId);
+    }
 
-        if (!attacker || !defender) return;
+    /**
+     * Saquea el dinero de un país vencido
+     */
+    lootCountry(attackerId, defenderId) {
+        return this.battleManager.lootCountry(attackerId, defenderId);
+    }
 
-        // 1. Transferir 25% de los puntos de desarrollo
-        for (const stat in defender.stats) {
-            const transferAmount = Math.floor(defender.stats[stat] * 0.25);
-            attacker.stats[stat] += transferAmount;
-            defender.stats[stat] -= transferAmount;
-        }
+    // --- Métodos Económicos (delegados a EconomicMinistry) ---
+
+    /**
+     * Obtiene información económica de un país
+     */
+    getEconomicInfo(country) {
+        return {
+            money: country.money,
+            income: country.income,
+            taxRate: country.taxRate,
+            armyMaintenanceCost: country.armyMaintenanceCost,
+            armyTrainingCost: country.armyTrainingCost,
+            netIncome: country.income - country.armyMaintenanceCost
+        };
+    }
+
+    /**
+     * Obtiene información económica avanzada de un país
+     */
+    getAdvancedEconomicInfo(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return null;
+
+        const basicInfo = this.getEconomicInfo(country);
+        const advancedInfo = this.economicMinistry.getEconomicInfo(country);
+        
+        return {
+            ...basicInfo,
+            ...advancedInfo,
+            totalIncome: advancedInfo.totalIncome,
+            industryBonus: advancedInfo.industryBonus,
+            infrastructureBonus: advancedInfo.infrastructureBonus
+        };
+    }
+
+    /**
+     * Construye/mejora una industria
+     */
+    buildIndustry(countryId, industryType) {
+        const country = this.getCountryById(countryId);
+        if (!country) return false;
+        
+        return this.economicMinistry.buildIndustry(country, industryType);
+    }
+
+    /**
+     * Construye infraestructura
+     */
+    buildInfrastructure(countryId, infrastructureType) {
+        const country = this.getCountryById(countryId);
+        if (!country) return false;
+        
+        return this.economicMinistry.buildInfrastructure(country, infrastructureType);
+    }
+
+    /**
+     * Verifica si se puede construir/mejorar una industria
+     */
+    canBuildIndustry(countryId, industryType) {
+        const country = this.getCountryById(countryId);
+        if (!country) return false;
+        
+        return this.economicMinistry.canBuildIndustry(country, industryType);
+    }
+
+    /**
+     * Verifica si se puede construir infraestructura
+     */
+    canBuildInfrastructure(countryId, infrastructureType) {
+        const country = this.getCountryById(countryId);
+        if (!country) return false;
+        
+        return this.economicMinistry.canBuildInfrastructure(country, infrastructureType);
+    }
+
+    /**
+     * Obtiene el costo de una industria
+     */
+    getIndustryCost(countryId, industryType) {
+        const country = this.getCountryById(countryId);
+        if (!country) return null;
+        
+        return this.economicMinistry.getIndustryCost(country, industryType);
+    }
+
+    /**
+     * Obtiene el costo de infraestructura
+     */
+    getInfrastructureCost(countryId, infrastructureType) {
+        const country = this.getCountryById(countryId);
+        if (!country) return null;
+        
+        return this.economicMinistry.getInfrastructureCost(country, infrastructureType);
+    }
+
+    /**
+     * Obtiene las acciones económicas disponibles
+     */
+    getAvailableEconomicActions(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return [];
+        
+        return this.economicMinistry.getAvailableActions(country);
+    }
+
+    /**
+     * Obtiene información de industrias de un país
+     */
+    getIndustryInfo(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return null;
+        
+        return {
+            industries: country.economicData.industries,
+            upgradeCounts: country.economicData.upgradeCounts
+        };
+    }
+
+    /**
+     * Obtiene información de infraestructura de un país
+     */
+    getInfrastructureInfo(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return null;
+        
+        return {
+            infrastructure: country.economicData.infrastructure
+        };
+    }
+
+    /**
+     * Obtiene la descripción de una industria
+     */
+    getIndustryDescription(industryType) {
+        return this.economicMinistry.getIndustryDescription(industryType);
+    }
+
+    /**
+     * Obtiene la descripción de una infraestructura
+     */
+    getInfrastructureDescription(infrastructureType) {
+        return this.economicMinistry.getInfrastructureDescription(infrastructureType);
+    }
+
+    /**
+     * Invierte en bonos del estado
+     */
+    investInBonds(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return false;
+        
+        return this.economicMinistry.investInBonds(country);
+    }
+
+    /**
+     * Invierte en fondo de desarrollo
+     */
+    investInDevelopmentFund(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return false;
+        
+        return this.economicMinistry.investInDevelopmentFund(country);
+    }
+
+    /**
+     * Crea reservas de emergencia
+     */
+    createEmergencyReserves(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return false;
+        
+        return this.economicMinistry.createEmergencyReserves(country);
+    }
+
+    /**
+     * Verifica si un país puede invertir en bonos
+     */
+    canInvestInBonds(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return false;
+        
+        return this.economicMinistry.canInvestInBonds(country);
+    }
+
+    /**
+     * Verifica si un país puede invertir en fondo de desarrollo
+     */
+    canInvestInDevelopmentFund(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return false;
+        
+        return this.economicMinistry.canInvestInDevelopmentFund(country);
+    }
+
+    /**
+     * Verifica si un país puede crear reservas de emergencia
+     */
+    canCreateEmergencyReserves(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return false;
+        
+        return this.economicMinistry.canCreateEmergencyReserves(country);
+    }
+
+    /**
+     * Obtiene información sobre inversiones en bonos
+     */
+    getBondInvestmentInfo(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return null;
+        
+        return this.economicMinistry.getBondInvestmentInfo(country);
+    }
+
+    /**
+     * Obtiene información sobre inversiones en fondo de desarrollo
+     */
+    getDevelopmentFundInfo(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return null;
+        
+        return this.economicMinistry.getDevelopmentFundInfo(country);
+    }
+
+    /**
+     * Obtiene información sobre reservas de emergencia
+     */
+    getEmergencyReservesInfo(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return null;
+        
+        return this.economicMinistry.getEmergencyReservesInfo(country);
+    }
+
+    /**
+     * Obtiene información completa de inversiones
+     */
+    getInvestmentInfo(countryId) {
+        const country = this.getCountryById(countryId);
+        if (!country) return null;
+        
+        const investments = country.economicData.investments;
+        const interest = this.economicMinistry.calculateInvestmentInterest(country);
+        
+        return {
+            investments: investments,
+            interest: interest,
+            totalInterest: Object.values(interest).reduce((sum, val) => sum + val, 0),
+            bondInfo: this.getBondInvestmentInfo(countryId),
+            developmentFundInfo: this.getDevelopmentFundInfo(countryId),
+            emergencyReservesInfo: this.getEmergencyReservesInfo(countryId)
+        };
     }
 } 

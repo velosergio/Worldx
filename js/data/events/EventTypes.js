@@ -16,6 +16,9 @@ class EventTypes {
     static NATURAL = 'natural';
     static POPULATION = 'population';
     static MILITARY = 'military';
+    static INDUSTRY = 'industry';
+    static INFRASTRUCTURE = 'infrastructure';
+    static FINANCIAL = 'financial';
 
     /**
      * Obtiene todos los tipos de eventos
@@ -35,7 +38,10 @@ class EventTypes {
             SOCIAL: this.SOCIAL,
             NATURAL: this.NATURAL,
             POPULATION: this.POPULATION,
-            MILITARY: this.MILITARY
+            MILITARY: this.MILITARY,
+            INDUSTRY: this.INDUSTRY,
+            INFRASTRUCTURE: this.INFRASTRUCTURE,
+            FINANCIAL: this.FINANCIAL
         };
     }
 
@@ -55,7 +61,10 @@ class EventTypes {
             [this.TECHNOLOGICAL]: '#44ffff', // Cian
             [this.DEVELOPMENT]: '#888888', // Gris
             [this.POPULATION]: '#ff66cc', // Rosa
-            [this.MILITARY]: '#ff6600' // Naranja militar
+            [this.MILITARY]: '#ff6600', // Naranja militar
+            [this.INDUSTRY]: '#a0522d', // Sienna
+            [this.INFRASTRUCTURE]: '#4CAF50',  // Verde infraestructura
+            [this.FINANCIAL]: '#32CD32'  // Verde lima para eventos financieros
         };
         
         return colors[eventType] || '#ffffff';
@@ -77,7 +86,10 @@ class EventTypes {
             [this.TECHNOLOGICAL]: '⚙️',
             [this.DEVELOPMENT]: '📈',
             [this.POPULATION]: '👥',
-            [this.MILITARY]: '⚔️'
+            [this.MILITARY]: '⚔️',
+            [this.INDUSTRY]: '🏭',
+            [this.INFRASTRUCTURE]: '🏗️',
+            [this.FINANCIAL]: '💰'
         };
         
         return icons[eventType] || '📋';
