@@ -27,7 +27,7 @@
 - **Sistema de Periodico**: Como en los juegos de Paradox
 - **Sistema de Leyes**: Como los del victoria 3
 
-## [v0.5] - 2025-06-22
+## [v0.5] - Alpha - 2025-06-22 
 
 Esta versión introduce una profunda revisión de la interfaz, economía y la guerra, sentando las bases para una jugabilidad más estratégica y compleja, tambien se modularizo y refactorizo `js/ui/UIManager.js`.
 
